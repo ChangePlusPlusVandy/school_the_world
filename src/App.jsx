@@ -1,8 +1,10 @@
 import * as React from "react"
-
+import Dashboard from "./Pages/Dashboard.jsx"
 function App(){
     return (
-        <h1>hello world</h1>
+        <div>
+            <Dashboard />
+        </div>
     )
 }
 
