@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const { createProgram, getAllPrograms } = require('./Backend/programs');
+const { createProgram, getAllPrograms, deleteProgram} = require('./Backend/programs');
 const PouchDB = require("pouchdb").default
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -63,3 +63,9 @@ ipcMain.handle("getAllPrograms", async (event) => {
   const result = await getAllPrograms(db);
   return result
 })
+
+//deleteProgram endpoint
+ipcMain.handle("deleteProgram", async (event, arg) => {
+  const result = await deleteProgram(arg, db);
+  return result;
+});

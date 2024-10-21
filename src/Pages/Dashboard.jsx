@@ -20,6 +20,11 @@ function Dashboard(){
         console.log(curData)
     }
 
+
+    const deleteProgram = async (docId) => {
+        const res = await window.electronAPI.deleteProgram(docId);
+    }
+
     return (
         <div>
             <Button onClick={() => {getAllPrograms()}}>print programs</Button>

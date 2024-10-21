@@ -17,7 +17,18 @@ async function getAllPrograms(db){
     }
 }
 
+async function deleteProgram(params, db) {
+    try {   
+        const target = await db.get(params);   //look up the document through docId
+        await db.remove(target);
+        console.log("Successfully deleted the program.");
+    } catch (err) {
+        console.error("Error deleting the doc:", err);
+    }
+}
+
 module.exports = {
     createProgram,
-    getAllPrograms
+    getAllPrograms,
+    deleteProgram
 }
