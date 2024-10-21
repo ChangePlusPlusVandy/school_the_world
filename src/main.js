@@ -1,6 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('node:path');
-const { createNewStudent } = require("./Backend/students")
+const { createProgram, getAllPrograms } = require('./Backend/programs');
 const PouchDB = require("pouchdb").default
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -55,7 +54,12 @@ app.on('window-all-closed', () => {
 const db = new PouchDB("session");
  
 
-ipcMain.handle("createNewStudent", async (arg) => {
-  const result = createNewStudent(arg, db);
+ipcMain.handle("createProgram", async (event, arg) => {
+  const result = await createProgram(arg, db);
   return result;
+})
+
+ipcMain.handle("getAllPrograms", async (event) => {
+  const result = await getAllPrograms(db);
+  return result
 })

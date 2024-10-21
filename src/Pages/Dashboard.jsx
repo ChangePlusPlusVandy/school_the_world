@@ -1,30 +1,28 @@
 import * as React from "react"
-import PouchDB from "pouchdb"
-import { useEffect, useState } from "react"
-import { TextInputField, Button } from "evergreen-ui"
+import { useState } from "react"
+import { Button } from "evergreen-ui"
 
 
 function Dashboard(){
     const [data, setData] = useState()
     
     const templateDoc = {
-        _id: "student_001",
-        name: "John Doe", 
-        daysInAttendance: 100,
-        daysAbsent: 5,
-        program: "Primary School"
+        _id: "tutor_program",
+        students: []
     }
     
-    const createStudent = () => {
-        window.electronAPI.createNewStudent(templateDoc).then((res) => {
-            console.log(res)
-        }).catch((err) => {
-            console.error("error", err)
-        })
+    const createProgram = async (doc) => {
+        const res = await window.electronAPI.createProgram(doc);
+    }
+
+    const getAllPrograms = async () => {
+        const curData = await window.electronAPI.getAllPrograms();
+        console.log(curData)
     }
 
     return (
         <div>
+            <Button onClick={() => {getAllPrograms()}}>print programs</Button>
         </div>
     )
     

@@ -1,1 +1,5 @@
-2024/10/06-12:13:27.130 55f0 Delete type=3 #1
+2024/10/20-20:08:40.370 2fc8 Recovering log #74
+2024/10/20-20:08:40.370 2fc8 Level-0 table #76: started
+2024/10/20-20:08:40.403 2fc8 Level-0 table #76: 237 bytes OK
+2024/10/20-20:08:40.414 2fc8 Delete type=0 #74
+2024/10/20-20:08:40.414 2fc8 Delete type=3 #72
