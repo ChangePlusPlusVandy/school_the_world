@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const { createProgram, getAllPrograms } = require('./Backend/programs');
+const { createProgram, getAllPrograms, addStudent} = require('./Backend/programs');
 const PouchDB = require("pouchdb").default
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
