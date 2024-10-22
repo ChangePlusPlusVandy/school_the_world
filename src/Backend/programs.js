@@ -17,7 +17,7 @@ async function getAllPrograms(db){
     }
 }
 
-async function getStudents(programId, db) {
+async function getStudentsByProgram(programId, db) {
     try {
         const result = await db.allDocs({include_docs: true});
         const students = result.rows.map(row => row.doc).filter(doc => doc.programId === programId);  
@@ -31,5 +31,5 @@ async function getStudents(programId, db) {
 module.exports = {
     createProgram,
     getAllPrograms,
-    getStudents
+    getStudentsByProgram
 }

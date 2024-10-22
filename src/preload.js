@@ -6,5 +6,5 @@ const { createProgram, getAllPrograms } = require("./Backend/programs")
 contextBridge.exposeInMainWorld("electronAPI", {
     createProgram: (doc) => ipcRenderer.invoke("createProgram", doc),
     getAllPrograms: () => ipcRenderer.invoke("getAllPrograms"),
-    getStudents: () => ipcRenderer.invoke("getStudents"),
+    getStudentsByProgram: () => ipcRenderer.invoke("getStudentsByProgram"),
 })
