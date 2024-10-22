@@ -7,3 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     createProgram: (doc) => ipcRenderer.invoke("createProgram", doc),
     getAllPrograms: () => ipcRenderer.invoke("getAllPrograms"),
 })
+
+contextBridge.exposeInMainWorld("electronAPI", {
+    addStudent: (doc) => ipcRenderer.invoke("addStudent", doc),
+})

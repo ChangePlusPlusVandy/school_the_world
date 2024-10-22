@@ -63,3 +63,9 @@ ipcMain.handle("getAllPrograms", async (event) => {
   const result = await getAllPrograms(db);
   return result
 })
+
+// 
+ipcMain.handle("addStudent", async (event, arg) => {
+  const result = await addStudent(arg, db);
+  return result;
+})
