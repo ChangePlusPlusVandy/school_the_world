@@ -5,6 +5,7 @@ async function addStudent(params, db){
         // res.students is an object that has (studentIds, another object representing the student)
         if (!res.students[params.studentId]) {
             res.students[params.studentId] = {
+                _id: params.studentId,
                 name: params.name,
                 daysAttended: params.daysAttended,
                 daysAbsent: params.daysAbsent
