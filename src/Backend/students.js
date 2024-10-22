@@ -14,6 +14,21 @@ function createNewStudent(params, db){
     })
 }
 
+//get student using studentId and programId
+async function getStudent(studentId, programId, db) {
+    try {
+        const program = await db.get(programId);
+        if (program.students && program.students[studentId]) {
+            return program.students[studentId]; 
+        } else {
+            console.error("Student not found");
+        }
+    } catch (err) {
+        console.error("Error getting student:", err);
+    }  
+}
+
 module.exports = {
-    createNewStudent
+    createNewStudent,
+    getStudent
 }

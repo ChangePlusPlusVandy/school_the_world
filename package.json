@@ -26,7 +26,7 @@
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "babel-loader": "^9.2.1",
     "css-loader": "^6.11.0",
-    "electron": "32.1.2",
+    "electron": "^33.0.0",
     "electron-rebuild": "^3.2.9",
     "node-loader": "^2.0.0",
     "style-loader": "^3.3.4"
@@ -38,6 +38,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "electron-forge": "^5.2.4",
     "electron-squirrel-startup": "^1.0.1",
     "evergreen-ui": "^7.1.9",
     "pouchdb": "^9.0.0",

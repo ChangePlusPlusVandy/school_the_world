@@ -59,3 +59,8 @@ ipcMain.handle("createNewStudent", async (arg) => {
   const result = createNewStudent(arg, db);
   return result;
 })
+
+ipcMain.handle("getStudent", async (studentId, programId) => {
+  const result = getStudent(studentId, programId, db);
+  return result;
+})
