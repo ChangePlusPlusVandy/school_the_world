@@ -1,9 +1,11 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-const { contextBridge, ipcRenderer} = require("electron")
-const { createProgram, getAllPrograms } = require("./Backend/programs")
+const { contextBridge, ipcRenderer } = require("electron");
+const { createProgram, getAllPrograms } = require("./Backend/programs");
+const { editStudent } = require("./Backend/students");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-    createProgram: (doc) => ipcRenderer.invoke("createProgram", doc),
-    getAllPrograms: () => ipcRenderer.invoke("getAllPrograms"),
-})
+  createProgram: (doc) => ipcRenderer.invoke("createProgram", doc),
+  getAllPrograms: () => ipcRenderer.invoke("getAllPrograms"),
+  editStudent: (doc) => ipcRenderer.invoke("editStudent", doc),
+});
