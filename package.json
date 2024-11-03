@@ -2,6 +2,7 @@
   "name": "school_the_world",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -12,7 +13,10 @@
     "lint": "expo lint"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-native/extend-expect"
+    ]
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
@@ -23,6 +27,7 @@
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.23",
     "expo-splash-screen": "~0.27.5",
+    "expo-sqlite": "~14.0.6",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
     "expo-web-browser": "~13.0.3",
@@ -37,10 +42,14 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@types/jest": "^29.5.12",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^12.8.0",
+    "@types/jest": "^29.5.14",
     "@types/react": "~18.2.45",
+    "@types/react-native": "^0.73.0",
     "@types/react-test-renderer": "^18.0.7",
-    "jest": "^29.2.1",
+    "expo-module-scripts": "^3.5.2",
+    "jest": "^29.7.0",
     "jest-expo": "~51.0.3",
     "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3"
