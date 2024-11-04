@@ -39,7 +39,7 @@ describe('DatabaseService', () => {
    })
   
    it('should get community by id successfully', async () => {
-     const mockCommunity: Community = { id: 1, name: 'Test Country' };
+     const mockCommunity: Community = { id: 1, name: 'Test Community', country: 'Test Country'};
      mockDb.getFirstAsync.mockResolvedValue(mockCommunity);
 
 
