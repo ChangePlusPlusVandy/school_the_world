@@ -9,7 +9,8 @@ export interface Country{
 
 export interface Community {
     id: number,
-    name: String
+    name: String,
+    country: String
 }
 
 export class DatabaseService {
