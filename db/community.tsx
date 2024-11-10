@@ -24,3 +24,19 @@ export async function insertCommunity(
     
     return null;
 }
+ export async function editCommunity(
+    db: SQLite.SQLiteDatabase,
+    newCommunity: Community,
+    id: number
+  ): Promise<Community | null> {
+    const result = await db.runAsync(
+      `UPDATE communities SET country = ?, name = ? WHERE id = ?`,
+      [newCommunity.country, newCommunity.name, id]
+    );
+  
+    if (result.changes > 0) {
+      return newCommunity; 
+    }
+  
+    return null;
+  }
