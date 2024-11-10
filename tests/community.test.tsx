@@ -1,7 +1,6 @@
-import * as SQLite from "expo-sqlite";
-import { DatabaseService, Country, createDatabase } from "@/db/base";
-import { Community, deleteCommunityById } from "@/db/community";
-
+import * as SQLite from 'expo-sqlite';
+import { DatabaseService, Country, createDatabase, Community } from '@/db/base';
+import {insertCommunity, deleteCommunityById} from '../db/community'
 // Mock expo-sqlite
 jest.mock("expo-sqlite", () => ({
   openDatabaseAsync: jest.fn(),
@@ -10,7 +9,6 @@ jest.mock("expo-sqlite", () => ({
 describe("DatabaseService", () => {
   let dbService: DatabaseService;
   let mockDb: jest.Mocked<SQLite.SQLiteDatabase>;
-
   beforeEach(() => {
     // Create mock database object
     mockDb = {
@@ -18,50 +16,107 @@ describe("DatabaseService", () => {
       runAsync: jest.fn(),
       getFirstAsync: jest.fn(),
     } as any;
-
     // Reset the mock and set default return value
     (SQLite.openDatabaseAsync as jest.Mock).mockReset();
     (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue(mockDb);
-
     // Create new instance for each test
     dbService = new DatabaseService();
   });
 
-  describe("deleteCommunityById", () => {
+  describe('addCommunity', () => {
     beforeEach(async () => {
       await dbService.initDatabase();
     });
-
-    it("should delete community by id successfully", async () => {
-      const mockCommunity: Community = {
-        country: "China",
-        id: 1,
-        name: "Test Community",
-      };
+    
+    it('should add community successfully', async () => {
+      const mockCommunity: Community = { id: 1, name: 'Test Community', country : 'Test Country' };
       const mockRunResult: SQLite.SQLiteRunResult = {
-        lastInsertRowId: Number(null),
-        changes: Number(1),
-      };
+        lastInsertRowId: Number(1),
+        changes: Number(1)
+      }
+      
+      mockDb.runAsync.mockResolvedValue(mockRunResult);
       mockDb.getFirstAsync.mockResolvedValue(mockCommunity);
-      mockDb.runAsync.mockResolvedValueOnce(mockRunResult);
 
-      const result = await dbService.deleteCommunityById(1);
+      const result = await insertCommunity(mockDb, mockCommunity.id, 'Test Community', 'Test Country', async (id) => mockCommunity);
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
-        `DELETE FROM communities WHERE id = ?`,
-        [1]
+        `INSERT INTO communities (id, name, countryName) VALUES (?, ?, ?)`,
+        [1, "Test Community", "Test Country"]
       );
       expect(result).toEqual(mockCommunity);
     });
 
-    it("should return null when community is not found", async () => {
-      mockDb.getFirstAsync.mockResolvedValue(null);
-
-      const result = await dbService.deleteCommunityById(999);
-
-      expect(mockDb.runAsync).not.toHaveBeenCalled();
+    it('should return null when insertion fails', async () => {
+      const result = await dbService.insertCommunity('Test Community');
 
       expect(result).toBeNull();
     });
+
+    it('should handle insertion errors gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Mock runAsync to throw an error
+      mockDb.runAsync.mockRejectedValue(new Error('Insertion error'));
+
+      const result = await insertCommunity(mockDb, 'Community_123', async (id) => null);
+
+      // Assertions
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith("Error inserting community:", expect.any(Error));
+
+      // Restore console error
+      consoleSpy.mockRestore();
+    });
+    // Test for editing a community
+  describe("edit community", () => {
+    beforeEach(async () => {
+      await dbService.initDatabase();
+    });
+  
+    it("should edit community successfully", async () => {
+      const mockCommunity: Community = {
+        country: "Mock Country",
+        id: 1,
+        name: "Mock Community",
+      };
+  
+      const mockRunResult: SQLite.SQLiteRunResult = {
+        lastInsertRowId: 1, 
+        changes: 1,
+      };
+      mockDb.runAsync.mockResolvedValue(mockRunResult); 
+
+      const result = await dbService.editCommunity(mockCommunity, 1);
+  
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        `UPDATE communities SET country = ?, name = ? WHERE id = ?`,
+        [mockCommunity.country, mockCommunity.name, 1]
+      );
+  
+      expect(result).toEqual(mockCommunity);
+    });
+  
+    // Null case testing when no rows are updated
+    it("should return null when community is not found", async () => {
+      // Simulate the case where no community with the provided id exists
+      const mockRunResult: SQLite.SQLiteRunResult = {
+        lastInsertRowId: 0,
+        changes: 0,
+      };
+      mockDb.runAsync.mockResolvedValue(mockRunResult);
+  
+      const result = await dbService.editCommunity(
+        { country: "Nonexistent Country", id: 999, name: "Nonexistent Community" },
+        999
+      );
+  
+      // Ensure no update was attempted and the result is null
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        `UPDATE communities SET country = ?, name = ? WHERE id = ?`,
+        ["Nonexistent Country", "Nonexistent Community", 999]
+      );
+      expect(result).toBeNull();
+    });
   });
-});
+

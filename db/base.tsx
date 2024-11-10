@@ -1,11 +1,19 @@
-import * as SQLite from "expo-sqlite";
-import { insertCountry, getCountryById } from "./country";
-import { Community, deleteCommunityById } from "./community";
+
+import * as SQLite from "expo-sqlite"
+import { insertCountry, getCountryById, editCountry } from "./country";
+import { insertCommunity, editCommunity, deleteCommunityById} from "./community";
 
 export interface Country {
   id: number;
   name: String;
 }
+        
+export interface Community {
+    id: number,
+    name: String,
+    country: String
+}
+
 
 export class DatabaseService {
   private db: SQLite.SQLiteDatabase | null = null;
@@ -25,7 +33,8 @@ export class DatabaseService {
     } catch (err) {
       console.error("error initializing db: ", err);
     }
-  }
+}
+
 
   async addCountry(countryName: string): Promise<Country | null> {
     try {
@@ -50,8 +59,38 @@ export class DatabaseService {
       return null;
     }
   }
-
-  async deleteCommunityById(id: number): Promise<Community | null> {
+  
+  async editCountry(id: number, countryName: string): Promise<Country | null> {
+    try {
+      if (!this.db) throw new Error("db not initialized");
+      return await editCountry(this.db, id, countryName);
+    } catch (err) {
+      console.error("error editing country: ", err);
+      return null;
+    }
+  }
+  
+  async addCommunity(communityName: string, countryName: string): Promise<Community|null> {
+        try {
+            if (!this.db) throw new Error("Database not initialized");
+            return await insertCommunity(this.db, communityName, countryName, this.getCommunityById.bind(this));
+        } catch (err) {
+            console.error("error adding community: ", err);
+            return null
+        }
+    }
+    
+   async editCommunity(newCommunity: Community, id: number): Promise<Community | null> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      return await editCommunity(this.db, newCommunity, id);
+    } catch (err) {
+      console.error("Error updating community by id:", err);
+      return null;
+    }
+  }
+  
+   async deleteCommunityById(id: number): Promise<Community | null> {
     try {
       if (!this.db) throw new Error("db not initialized");
       return await deleteCommunityById(this.db, id);

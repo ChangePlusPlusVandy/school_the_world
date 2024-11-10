@@ -1,12 +1,47 @@
-import * as SQLite from "expo-sqlite";
+import * as SQLite from 'expo-sqlite'
 
 export interface Community {
-  country: String;
-  id: number;
-  name: String;
+   id: number,
+   name: String,
+   country: String
 }
 
-export const deleteCommunityById = async (
+export async function insertCommunity(
+    db: SQLite.SQLiteDatabase, 
+    id: number,
+    communityName: string,
+    countryName: string,
+    getById: (id: number) => Promise<Community | null>
+): Promise<Community | null> {
+    const result = await db.runAsync(
+        `INSERT INTO communities (_id, name, countryname) VALUES (?, ?)`,
+        [id, communityName, countryName]
+    );
+
+    if (result.lastInsertRowId) {
+        return getById(Number(result.lastInsertRowId));
+    }
+    
+    return null;
+}
+ export async function editCommunity(
+    db: SQLite.SQLiteDatabase,
+    newCommunity: Community,
+    id: number
+  ): Promise<Community | null> {
+    const result = await db.runAsync(
+      `UPDATE communities SET country = ?, name = ? WHERE id = ?`,
+      [newCommunity.country, newCommunity.name, id]
+    );
+  
+    if (result.changes > 0) {
+      return newCommunity; 
+    }
+  
+    return null;
+  }
+  
+  export const deleteCommunityById = async (
   db: SQLite.SQLiteDatabase,
   id: number
 ): Promise<Community | null> => {
