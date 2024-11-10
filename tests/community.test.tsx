@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
-import { DatabaseService, Country, createDatabase } from '@/db/base';
-
+import { DatabaseService, Country, createDatabase, Community } from '@/db/base';
+import {insertCommunity} from '../db/community'
 
 // Mock expo-sqlite
 jest.mock('expo-sqlite', () => ({
@@ -26,4 +26,53 @@ describe('DatabaseService', () => {
     // Create new instance for each test
     dbService = new DatabaseService();
   });
+    
+  describe('addCommunity', () => {
+    beforeEach(async () => {
+      await dbService.initDatabase();
+    });
+
+    it('should add community successfully', async () => {
+      const mockCommunity: Community = { id: 1, name: 'Test Community', country : 'Test Country' };
+      const mockRunResult: SQLite.SQLiteRunResult = {
+        lastInsertRowId: Number(1),
+        changes: Number(1)
+      }
+      
+      mockDb.runAsync.mockResolvedValue(mockRunResult);
+      mockDb.getFirstAsync.mockResolvedValue(mockCommunity);
+
+      const result = await insertCommunity(mockDb, mockCommunity.id, 'Test Community', 'Test Country', async (id) => mockCommunity);
+
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        `INSERT INTO communities (id, name, countryName) VALUES (?, ?, ?)`,
+        [1, "Test Community", "Test Country"]
+      );
+      expect(result).toEqual(mockCommunity);
+    });
+
+    it('should return null when insertion fails', async () => {
+      const result = await dbService.insertCommunity('Test Community');
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle insertion errors gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Mock runAsync to throw an error
+      mockDb.runAsync.mockRejectedValue(new Error('Insertion error'));
+
+      const result = await insertCommunity(mockDb, 'Community_123', async (id) => null);
+
+      // Assertions
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith("Error inserting community:", expect.any(Error));
+
+      // Restore console error
+      consoleSpy.mockRestore();
+    });
+
+  });
+
 });
