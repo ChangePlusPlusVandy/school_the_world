@@ -1,7 +1,6 @@
-
 import * as SQLite from 'expo-sqlite';
 import { DatabaseService, Country, createDatabase, Community } from '@/db/base';
-import {insertCommunity} from '../db/community'
+import {insertCommunity, deleteCommunityById} from '../db/community'
 // Mock expo-sqlite
 jest.mock("expo-sqlite", () => ({
   openDatabaseAsync: jest.fn(),
@@ -23,12 +22,12 @@ describe("DatabaseService", () => {
     // Create new instance for each test
     dbService = new DatabaseService();
   });
-    
+
   describe('addCommunity', () => {
     beforeEach(async () => {
       await dbService.initDatabase();
     });
-
+    
     it('should add community successfully', async () => {
       const mockCommunity: Community = { id: 1, name: 'Test Community', country : 'Test Country' };
       const mockRunResult: SQLite.SQLiteRunResult = {
@@ -120,3 +119,4 @@ describe("DatabaseService", () => {
       expect(result).toBeNull();
     });
   });
+

@@ -1,17 +1,19 @@
+
 import * as SQLite from "expo-sqlite"
 import { insertCountry, getCountryById, editCountry } from "./country";
-import { insertCommunity, editCommunity} from "./community";
+import { insertCommunity, editCommunity, deleteCommunityById} from "./community";
 
 export interface Country {
   id: number;
   name: String;
 }
-
+        
 export interface Community {
     id: number,
     name: String,
     country: String
 }
+
 
 export class DatabaseService {
   private db: SQLite.SQLiteDatabase | null = null;
@@ -31,7 +33,8 @@ export class DatabaseService {
     } catch (err) {
       console.error("error initializing db: ", err);
     }
-  }
+}
+
 
   async addCountry(countryName: string): Promise<Country | null> {
     try {
@@ -83,6 +86,16 @@ export class DatabaseService {
       return await editCommunity(this.db, newCommunity, id);
     } catch (err) {
       console.error("Error updating community by id:", err);
+      return null;
+    }
+  }
+  
+   async deleteCommunityById(id: number): Promise<Community | null> {
+    try {
+      if (!this.db) throw new Error("db not initialized");
+      return await deleteCommunityById(this.db, id);
+    } catch (err) {
+      console.error("error getting country by id", err);
       return null;
     }
   }
