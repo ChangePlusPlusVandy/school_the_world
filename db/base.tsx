@@ -1,9 +1,16 @@
 import * as SQLite from "expo-sqlite"
 import { insertCountry, getCountryById } from "./country";
+import { insertCommunity} from "./community";
 
 export interface Country{
     id: number,
     name: String
+}
+
+export interface Community {
+    id: number,
+    name: String,
+    country: String
 }
 
 export class DatabaseService {
@@ -46,6 +53,17 @@ export class DatabaseService {
             return null
         }
     }
+
+    async addCommunity(communityName: string, countryName: string): Promise<Community|null> {
+        try {
+            if (!this.db) throw new Error("Database not initialized");
+            return await insertCommunity(this.db, communityName, countryName, this.getCommunityById.bind(this));
+        } catch (err) {
+            console.error("error adding community: ", err);
+            return null
+        }
+    }
+
 }
 
 export const createDatabase = async () => {
