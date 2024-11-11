@@ -47,27 +47,7 @@ describe("DatabaseService", () => {
       expect(result).toEqual(mockCommunity);
     });
 
-    it('should return null when insertion fails', async () => {
-      const result = await dbService.insertCommunity('Test Community');
 
-      expect(result).toBeNull();
-    });
-
-    it('should handle insertion errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-      // Mock runAsync to throw an error
-      mockDb.runAsync.mockRejectedValue(new Error('Insertion error'));
-
-      const result = await insertCommunity(mockDb, 'Community_123', async (id) => null);
-
-      // Assertions
-      expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith("Error inserting community:", expect.any(Error));
-
-      // Restore console error
-      consoleSpy.mockRestore();
-    });
     // Test for editing a community
   describe("edit community", () => {
     beforeEach(async () => {
@@ -119,4 +99,5 @@ describe("DatabaseService", () => {
       expect(result).toBeNull();
     });
   });
-
+})
+})

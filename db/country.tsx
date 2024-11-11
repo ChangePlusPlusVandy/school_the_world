@@ -2,7 +2,7 @@ import * as SQLite from "expo-sqlite";
 
 export interface Country {
   id: number;
-  name: String;
+  name: string;
 }
 
 export async function insertCountry(

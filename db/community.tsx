@@ -2,8 +2,8 @@ import * as SQLite from 'expo-sqlite'
 
 export interface Community {
    id: number,
-   name: String,
-   country: String
+   name: string,
+   country: string
 }
 
 export async function insertCommunity(
@@ -14,7 +14,7 @@ export async function insertCommunity(
     getById: (id: number) => Promise<Community | null>
 ): Promise<Community | null> {
     const result = await db.runAsync(
-        `INSERT INTO communities (_id, name, countryname) VALUES (?, ?)`,
+        `INSERT INTO communities (id, name, countryName) VALUES (?, ?, ?)`,
         [id, communityName, countryName]
     );
 
@@ -44,7 +44,7 @@ export async function insertCommunity(
   export const deleteCommunityById = async (
   db: SQLite.SQLiteDatabase,
   id: number
-): Promise<Community | null> => {
+  ): Promise<Community | null> => {
   try {
     const community = await db.getFirstAsync<Community>(
       `SELECT 1 FROM communities WHERE id = ? LIMIT 1`,
@@ -60,3 +60,15 @@ export async function insertCommunity(
     return null;
   }
 };
+
+export async function getCommunityById(
+  db: SQLite.SQLiteDatabase,
+  id: number 
+): Promise<Community| null> {
+  const result = await db.getFirstAsync<Community>(
+    `SELECT * FROM communities WHERE id = ?`,
+    [id]
+  );
+
+  return result || null;
+}
