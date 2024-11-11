@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite"
-import { insertCountry, getCountryById } from "./country";
+import { insertCountry, getCountryById, deleteCountry } from "./country";
 
 export interface Country{
     id: number,
@@ -46,6 +46,17 @@ export class DatabaseService {
             return null
         }
     }
+
+    async deleteCountry(id: number): Promise<Country|null> {
+        try {
+            if (!this.db) throw new Error("Database not initialized");
+            return await deleteCountry(this.db, id);
+        } catch (err) {
+            console.error("error deleting country with given id: ", err);
+            return null
+        }
+    }
+
 }
 
 export const createDatabase = async () => {

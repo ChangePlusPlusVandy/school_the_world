@@ -120,4 +120,39 @@ describe('DatabaseService', () => {
       expect(SQLite.openDatabaseAsync).toHaveBeenCalledWith('local.db');
     });
   });
+
+  describe("deleteCountry", () => {
+    beforeEach(async () => {
+      await dbService.initDatabase();
+    });
+
+    it("should delete country by id successfully", async () => {
+      const mockCountry: Country = { id: 1, name: "Test Country",};
+      const mockRunResult: SQLite.SQLiteRunResult = {
+        lastInsertRowId: Number(null),
+        changes: Number(1),
+      };
+
+      mockDb.runAsync.mockResolvedValueOnce(mockRunResult);
+      mockDb.getFirstAsync.mockResolvedValue(mockCountry);
+      
+      const result = await dbService.deleteCountry(1);
+
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        `DELETE FROM countries WHERE id = ?`,
+        [1]
+      );
+
+      expect(result).toEqual(mockCountry);
+    });
+    it("should return null when deletion fails", async () => {
+
+      mockDb.getFirstAsync.mockResolvedValue(null);
+      const result = await dbService.deleteCountry(999);
+      expect(mockDb.runAsync).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+      
+    });
+  });
 })
+
