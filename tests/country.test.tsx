@@ -1,13 +1,12 @@
-import * as SQLite from 'expo-sqlite';
-import { DatabaseService, Country, createDatabase } from '@/db/base';
-
+import * as SQLite from "expo-sqlite";
+import { DatabaseService, Country, createDatabase } from "@/db/base";
 
 // Mock expo-sqlite
-jest.mock('expo-sqlite', () => ({
+jest.mock("expo-sqlite", () => ({
   openDatabaseAsync: jest.fn(),
 }));
 
-describe('DatabaseService', () => {
+describe("DatabaseService", () => {
   let dbService: DatabaseService;
   let mockDb: jest.Mocked<SQLite.SQLiteDatabase>;
 
@@ -27,49 +26,46 @@ describe('DatabaseService', () => {
     dbService = new DatabaseService();
   });
 
-  describe('initDatabase', () => {
-    it('should initialize database successfully', async () => {
-      const consoleSpy = jest.spyOn(console, 'log');
-      
+  describe("initDatabase", () => {
+    it("should initialize database successfully", async () => {
+      const consoleSpy = jest.spyOn(console, "log");
+
       await dbService.initDatabase();
 
-      expect(SQLite.openDatabaseAsync).toHaveBeenCalledWith('local.db');
+      expect(SQLite.openDatabaseAsync).toHaveBeenCalledWith("local.db");
       expect(mockDb.execAsync).toHaveBeenCalledWith(
-        expect.stringContaining('CREATE TABLE IF NOT EXISTS countries')
+        expect.stringContaining("CREATE TABLE IF NOT EXISTS countries")
       );
-      expect(consoleSpy).toHaveBeenCalledWith('db initialized successfully');
+      expect(consoleSpy).toHaveBeenCalledWith("db initialized successfully");
     });
 
-    it('should handle initialization errors', async () => {
-      const error = new Error('Database initialization failed');
+    it("should handle initialization errors", async () => {
+      const error = new Error("Database initialization failed");
       (SQLite.openDatabaseAsync as jest.Mock).mockRejectedValue(error);
-      const consoleSpy = jest.spyOn(console, 'error');
+      const consoleSpy = jest.spyOn(console, "error");
 
       await dbService.initDatabase();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'error initializing db: ',
-        error
-      );
+      expect(consoleSpy).toHaveBeenCalledWith("error initializing db: ", error);
     });
   });
 
-  describe('addCountry', () => {
+  describe("addCountry", () => {
     beforeEach(async () => {
       await dbService.initDatabase();
     });
 
-    it('should add country successfully', async () => {
-      const mockCountry: Country = { id: 1, name: 'Test Country' };
+    it("should add country successfully", async () => {
+      const mockCountry: Country = { id: 1, name: "Test Country" };
       const mockRunResult: SQLite.SQLiteRunResult = {
         lastInsertRowId: Number(1),
-        changes: Number(1)
-      }
-      
+        changes: Number(1),
+      };
+
       mockDb.runAsync.mockResolvedValue(mockRunResult);
       mockDb.getFirstAsync.mockResolvedValue(mockCountry);
 
-      const result = await dbService.addCountry('Test Country');
+      const result = await dbService.addCountry("Test Country");
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         `INSERT INTO countries (name) VALUES (?)`,
@@ -78,32 +74,32 @@ describe('DatabaseService', () => {
       expect(result).toEqual(mockCountry);
     });
 
-    it('should return null when insertion fails', async () => {
-      const result = await dbService.addCountry('Test Country');
+    it("should return null when insertion fails", async () => {
+      const result = await dbService.addCountry("Test Country");
 
       expect(result).toBeNull();
     });
-
   });
 
-  describe('getCountryById', () => {
+  describe("getCountryById", () => {
     beforeEach(async () => {
       await dbService.initDatabase();
     });
 
-    it('should get country by id successfully', async () => {
-      const mockCountry: Country = { id: 1, name: 'Test Country' };
+    it("should get country by id successfully", async () => {
+      const mockCountry: Country = { id: 1, name: "Test Country" };
       mockDb.getFirstAsync.mockResolvedValue(mockCountry);
 
       const result = await dbService.getCountryById(1);
 
       expect(mockDb.getFirstAsync).toHaveBeenCalledWith(
-        `SELECT * FROM countries WHERE id = ?`, [1]
+        `SELECT * FROM countries WHERE id = ?`,
+        [1]
       );
       expect(result).toEqual(mockCountry);
     });
 
-    it('should return null when country is not found', async () => {
+    it("should return null when country is not found", async () => {
       mockDb.getFirstAsync.mockResolvedValue(null);
 
       const result = await dbService.getCountryById(999);
@@ -112,16 +108,76 @@ describe('DatabaseService', () => {
     });
   });
 
-  describe('createDatabase', () => {
-    it('should create and initialize database instance', async () => {
-      const dbService = await createDatabase();
+  describe("editCountry", () => {
+    beforeEach(async () => {
+      await dbService.initDatabase();
+    });
 
-      expect(dbService).toBeInstanceOf(DatabaseService);
-      expect(SQLite.openDatabaseAsync).toHaveBeenCalledWith('local.db');
+    it("should add a country and then edit it successfully", async () => {
+      const mockAddedCountry: Country = { id: 1, name: "Test Country" };
+      const mockAddRunResult: SQLite.SQLiteRunResult = {
+        lastInsertRowId: Number(1),
+        changes: Number(1),
+      };
+
+      mockDb.runAsync.mockResolvedValueOnce(mockAddRunResult);
+      mockDb.getFirstAsync.mockResolvedValueOnce(mockAddedCountry);
+
+      const addResult = await dbService.addCountry("Test Country");
+
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        `INSERT INTO countries (name) VALUES (?)`,
+        ["Test Country"]
+      );
+      expect(addResult).toEqual(mockAddedCountry);
+
+      // Now, edit the country
+      const mockEditedCountry: Country = { id: 1, name: "Updated Country" };
+      const mockEditRunResult: SQLite.SQLiteRunResult = {
+        lastInsertRowId: Number(1),
+        changes: Number(1),
+      };
+
+      mockDb.runAsync.mockResolvedValueOnce(mockEditRunResult);
+      mockDb.getFirstAsync.mockResolvedValueOnce(mockEditedCountry);
+
+      const editResult = await dbService.editCountry(1, "Updated Country");
+
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        `UPDATE countries SET name = ? WHERE id = ?`,
+        ["Updated Country", 1]
+      );
+      expect(mockDb.getFirstAsync).toHaveBeenCalledWith(
+        `SELECT * FROM countries WHERE id = ?`,
+        [1]
+      );
+      expect(editResult).toEqual(mockEditedCountry);
+    });
+
+    it("should return null when editing a non-existent country", async () => {
+      const mockRunResult: SQLite.SQLiteRunResult = {
+        lastInsertRowId: Number(0),
+        changes: Number(0),
+      };
+
+      mockDb.runAsync.mockResolvedValue(mockRunResult);
+
+      const result = await dbService.editCountry(999, "Non-existent Country");
+
+      expect(result).toBeNull();
     });
   });
 
-  describe("deleteCountry", () => {
+  describe("createDatabase", () => {
+    it("should create and initialize database instance", async () => {
+      const dbService = await createDatabase();
+
+      expect(dbService).toBeInstanceOf(DatabaseService);
+      expect(SQLite.openDatabaseAsync).toHaveBeenCalledWith("local.db");
+    });
+  });
+  
+   describe("deleteCountry", () => {
     beforeEach(async () => {
       await dbService.initDatabase();
     });
@@ -155,4 +211,5 @@ describe('DatabaseService', () => {
     });
   });
 })
+});
 
