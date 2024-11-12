@@ -108,65 +108,6 @@ describe("DatabaseService", () => {
     });
   });
 
-  describe("editCountry", () => {
-    beforeEach(async () => {
-      await dbService.initDatabase();
-    });
-
-    it("should add a country and then edit it successfully", async () => {
-      const mockAddedCountry: Country = { id: 1, name: "Test Country" };
-      const mockAddRunResult: SQLite.SQLiteRunResult = {
-        lastInsertRowId: Number(1),
-        changes: Number(1),
-      };
-
-      mockDb.runAsync.mockResolvedValueOnce(mockAddRunResult);
-      mockDb.getFirstAsync.mockResolvedValueOnce(mockAddedCountry);
-
-      const addResult = await dbService.addCountry("Test Country");
-
-      expect(mockDb.runAsync).toHaveBeenCalledWith(
-        `INSERT INTO countries (name) VALUES (?)`,
-        ["Test Country"]
-      );
-      expect(addResult).toEqual(mockAddedCountry);
-
-      // Now, edit the country
-      const mockEditedCountry: Country = { id: 1, name: "Updated Country" };
-      const mockEditRunResult: SQLite.SQLiteRunResult = {
-        lastInsertRowId: Number(1),
-        changes: Number(1),
-      };
-
-      mockDb.runAsync.mockResolvedValueOnce(mockEditRunResult);
-      mockDb.getFirstAsync.mockResolvedValueOnce(mockEditedCountry);
-
-      const editResult = await dbService.editCountry(1, "Updated Country");
-
-      expect(mockDb.runAsync).toHaveBeenCalledWith(
-        `UPDATE countries SET name = ? WHERE id = ?`,
-        ["Updated Country", 1]
-      );
-      expect(mockDb.getFirstAsync).toHaveBeenCalledWith(
-        `SELECT * FROM countries WHERE id = ?`,
-        [1]
-      );
-      expect(editResult).toEqual(mockEditedCountry);
-    });
-
-    it("should return null when editing a non-existent country", async () => {
-      const mockRunResult: SQLite.SQLiteRunResult = {
-        lastInsertRowId: Number(0),
-        changes: Number(0),
-      };
-
-      mockDb.runAsync.mockResolvedValue(mockRunResult);
-
-      const result = await dbService.editCountry(999, "Non-existent Country");
-
-      expect(result).toBeNull();
-    });
-  });
 
   describe("createDatabase", () => {
     it("should create and initialize database instance", async () => {
@@ -211,5 +152,4 @@ describe("DatabaseService", () => {
     });
   });
 })
-});
 

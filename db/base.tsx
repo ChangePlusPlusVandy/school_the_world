@@ -60,10 +60,10 @@ export class DatabaseService {
     }
   }
   
-  async editCountry(id: number, countryName: string): Promise<Country | null> {
+  async editCountry(id: number, newCountry: Country): Promise<Country | null> {
     try {
       if (!this.db) throw new Error("db not initialized");
-      return await editCountry(this.db, id, countryName);
+      return await editCountry(this.db, id, newCountry);
     } catch (err) {
       console.error("error editing country: ", err);
       return null;
@@ -108,6 +108,7 @@ export class DatabaseService {
       console.error("error getting country by id", err);
       return null;
     }
+  }
 
    async deleteCountry(id: number): Promise<Country|null> {
         try {

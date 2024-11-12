@@ -25,7 +25,7 @@ export async function getCountryById(
   db: SQLite.SQLiteDatabase,
   id: number
 ): Promise<Country | null> {
-  const result = await db.getFirstAsync<Country>(
+  const result: Country | null = await db.getFirstAsync<Country>(
     `SELECT * FROM countries WHERE id = ?`,
     [id]
   );
@@ -36,13 +36,13 @@ export async function getCountryById(
 export async function editCountry(
   db: SQLite.SQLiteDatabase,
   id: number,
-  countryName: string
-): Promise<Country | null> {
-  const result = await db.runAsync(
+  newCountry: Country
+): Promise<Country> {
+  await db.runAsync(
     `UPDATE countries SET name = ? WHERE id = ?`,
-    [countryName, id]
+    [newCountry.name, id]
   );
-    return result || null;
+    return newCountry;
 }
 
 export const deleteCountry = async (
