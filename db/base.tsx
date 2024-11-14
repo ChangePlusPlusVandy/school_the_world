@@ -1,7 +1,7 @@
 
 import * as SQLite from "expo-sqlite"
 import { insertCountry, getCountryById, editCountry, deleteCountry } from "./country";
-import { insertCommunity, editCommunity, deleteCommunityById, getCommunityById } from "./community";
+import { insertCommunity, editCommunity, deleteCommunityById, getCommunityById, getAllCommunitiesByCountry} from "./community";
 
 export interface Country {
   id: number;
@@ -117,6 +117,18 @@ export class DatabaseService {
         } catch (err) {
             console.error("error deleting country with given id: ", err);
             return null
+        }
+    }
+
+
+
+    async getCommunitiesByCountry(country: string): Promise<Community[] | null> {
+        try {
+          if (!this.db) throw new Error('Database not initialized');
+          return await getAllCommunitiesByCountry(this.db, country);
+        } catch (error) {
+          console.error('error getting all communities by country: ', error);
+          return null;
         }
     }
   
