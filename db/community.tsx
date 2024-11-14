@@ -6,6 +6,8 @@ export interface Community {
    country: string
 }
 
+
+
 export async function insertCommunity(
     db: SQLite.SQLiteDatabase, 
     id: number,
@@ -71,4 +73,21 @@ export async function getCommunityById(
   );
 
   return result || null;
+}
+
+export async function getAllCommunitiesByCountry(
+  db: SQLite.SQLiteDatabase,
+  country: string
+): Promise<Community[] | null> {
+  try {
+    const results = await db.getAllAsync<Community>(
+      'SELECT * FROM communities WHERE country = ?',
+      [country]
+    );
+    return results;
+  }
+  catch (error) {
+    console.log('Failed to get all communities by country');
+    return null;
+  }
 }

@@ -15,6 +15,7 @@ describe("DatabaseService", () => {
       execAsync: jest.fn(),
       runAsync: jest.fn(),
       getFirstAsync: jest.fn(),
+      getAllAsync: jest.fn()
     } as any;
     // Reset the mock and set default return value
     (SQLite.openDatabaseAsync as jest.Mock).mockReset();
@@ -99,5 +100,54 @@ describe("DatabaseService", () => {
       expect(result).toBeNull();
     });
   });
+
+
+  //testing for getting all communities by the given country
+  describe('getting all communities by country', ()=> {
+    beforeEach(async () => {
+      await dbService.initDatabase();
+      console.log = jest.fn();
+    });
+
+    it("should get communities by country successfully", async () => {
+      const mockCommunities2: Community[] = [{ id: 1, name: "Test Community 1", country: "USA"},
+        {id: 2, name: "Test Community 2", country: "USA"}];
+
+      mockDb.getAllAsync.mockResolvedValue(mockCommunities2);
+
+      const result = await dbService.getCommunitiesByCountry('USA');
+
+      expect(mockDb.getAllAsync).toHaveBeenCalledWith(
+        `SELECT * FROM communities WHERE country = ?`,
+        ['USA']
+      );
+
+      expect(result).toEqual(mockCommunities2);
+    });
+
+    //'fake testing'
+    it('should return an empty array when the specified country is not detected', async () => {
+      mockDb.getAllAsync.mockResolvedValue([]);
+      
+      const result = await dbService.getCommunitiesByCountry('Mexico');
+
+      expect(mockDb.getAllAsync).toHaveBeenCalledWith(
+        `SELECT * FROM communities WHERE country = ?`,
+        ['Mexico']
+      );
+      expect(result).toEqual([]);
+    });
+
+    //null case testing
+    it('should return null when there is an error during the execution', async () => {
+      mockDb.getAllAsync.mockRejectedValue(new Error("Testing the error case: catch block testing..."));
+
+      const result = await dbService.getCommunitiesByCountry('Mexico');
+      
+      expect(result).toBeNull();
+      expect(console.log).toHaveBeenCalledWith(
+        'Failed to get all communities by country');
+    });
+  })
 })
 })
