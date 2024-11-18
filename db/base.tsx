@@ -12,7 +12,10 @@ import {
   getCommunityById,
   getAllCommunitiesByCountry,
 } from "./community";
-import { getAllEntriesBySchool } from "./entry";
+import {
+  getAllEntriesBySchool,
+  editEntry
+} from "./entry";
 
 export interface Country {
   id: number;
@@ -180,6 +183,16 @@ export class DatabaseService {
       return await getAllEntriesBySchool(this.db, schoolId);
     } catch (error) {
       console.error("error getting all entries by school: ", error);
+      return null;
+    }
+  }
+
+  async editEntry(schoolId: string, entryId:string, newEntry: Entry): Promise<Entry | null> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      return await editEntry(this.db, schoolId, entryId, newEntry);
+    } catch (err) {
+      console.error("Error editing entry by schoolId:", err);
       return null;
     }
   }
