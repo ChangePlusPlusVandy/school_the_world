@@ -14,6 +14,7 @@ import {
 } from "./community";
 import {
   getAllEntriesBySchool,
+  insertEntry,
   editEntry
 } from "./entry";
 
@@ -104,6 +105,16 @@ export class DatabaseService {
     }
   }
 
+  async createEntry(entry: Omit<Entry, "id">): Promise<Entry | null> {
+        try {
+          if (!this.db) throw new Error("Database not initialized");
+          return await insertEntry(this.db, entry);
+        } catch (error) {
+          console.error("Error creating entry:", error);
+          return null;
+        }
+    }
+    
   async addCommunity(
     communityName: string,
     countryName: string,
