@@ -1,9 +1,33 @@
 import * as SQLite from "expo-sqlite"
 import { insertCountry, getCountryById, deleteCountry } from "./country";
+import { insertEntry } from "./entry";
 
 export interface Country{
     id: number,
     name: String
+}
+
+export interface Entry {
+    id: string;
+    arrival_date: string;
+    arrival_time: string;
+    time_teachers_arrive: string;
+    time_children_leave: string;
+    time_classes_start: string;
+    time_classes_end: string;
+    recess_time: string;
+    num_hours_children: string;
+    num_teachers_absent: string;
+    cleanliness: string;
+    playground_used: boolean;
+    sinks_used: boolean;
+    classroom_decor: string;
+    classrooms_used: boolean;
+    observations: string;
+    program_type: string;
+    num_children: string;
+    num_parents: string;
+    school: string;
 }
 
 export class DatabaseService {
@@ -57,6 +81,15 @@ export class DatabaseService {
         }
     }
 
+    async createEntry(entry: Omit<Entry, "id">): Promise<Entry | null> {
+        try {
+          if (!this.db) throw new Error("Database not initialized");
+          return await insertEntry(this.db, entry);
+        } catch (error) {
+          console.error("Error creating entry:", error);
+          return null;
+        }
+    }
 }
 
 export const createDatabase = async () => {
