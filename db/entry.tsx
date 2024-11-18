@@ -25,7 +25,7 @@ export interface Entry {
 
 export async function insertEntry(
   db: SQLite.SQLiteDatabase,
-  entry: Omit<Entry, "id">, // sqlite generated id
+  entry: Omit<Entry, "id"> // sqlite generated id
 ): Promise<Entry | null> {
   try {
     const result = await db.runAsync(
@@ -48,15 +48,15 @@ export async function insertEntry(
         entry.num_hours_children,
         entry.num_teachers_absent,
         entry.cleanliness,
-        entry.playground_used ? 1 : 0, 
-        entry.sinks_used ? 1 : 0,    
+        entry.playground_used ? 1 : 0,
+        entry.sinks_used ? 1 : 0,
         entry.classroom_decor,
-        entry.classrooms_used ? 1 : 0, 
+        entry.classrooms_used ? 1 : 0,
         entry.observations,
         entry.program_type,
         entry.num_children,
         entry.num_parents,
-        entry.school, 
+        entry.school,
       ]
     );
 
@@ -69,7 +69,7 @@ export async function insertEntry(
     console.error("Error inserting entry:", error);
   }
 
-  return null; 
+  return null;
 }
 
 export interface School {
@@ -104,6 +104,26 @@ export async function getAllEntriesBySchool(
     return null;
   }
 }
+
+export const deleteEntryById = async (
+  db: SQLite.SQLiteDatabase,
+  id: string
+): Promise<Entry | null> => {
+  try {
+    const entry = await db.getFirstAsync<Entry>(
+      `SELECT * FROM entries WHERE id = ? LIMIT 1`,
+      [id]
+    );
+    if (!entry) {
+      return null;
+    }
+    await db.runAsync(`DELETE FROM entries WHERE id = ?`, [id]);
+    return entry;
+  } catch (error) {
+    console.error("Fail to delete entry by id.");
+    return null;
+  }
+};
 
 export async function editEntry(
   db: SQLite.SQLiteDatabase,
@@ -153,14 +173,17 @@ export async function editEntry(
         newEntry.num_children,
         newEntry.num_parents,
         entryId,
-        schoolId
+        schoolId,
       ]
     );
-  
+
     if (result.changes > 0) {
-      return newEntry; 
+      return newEntry;
     }
-  
+
+    return null;
+  } catch (error) {
+    console.error("Fail to edit entry.");
     return null;
   }
 }
