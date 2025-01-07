@@ -38,32 +38,31 @@ export async function editCountry(
   id: number,
   newCountry: Country
 ): Promise<Country> {
-  await db.runAsync(
-    `UPDATE countries SET name = ? WHERE id = ?`,
-    [newCountry.name, id]
-  );
-    return newCountry;
+  await db.runAsync(`UPDATE countries SET name = ? WHERE id = ?`, [
+    newCountry.name,
+    id,
+  ]);
+  return newCountry;
 }
 
 export const deleteCountry = async (
-    db: SQLite.SQLiteDatabase,
-    id: number
-  ): Promise<Country | null> => {
-    try {
-      const country = await db.getFirstAsync<Country>(
-        `SELECT 1 FROM countries WHERE id = ? LIMIT 1`,
-        [id]
-      );
-      if (!country) {
-        return null;
-      }
-
-      await db.runAsync(`DELETE FROM countries WHERE id = ?`, [id]);
-      return country;
-    } catch (error) {
-      console.error("Failed to delete country");
-      
+  db: SQLite.SQLiteDatabase,
+  id: number
+): Promise<Country | null> => {
+  try {
+    const country = await db.getFirstAsync<Country>(
+      `SELECT 1 FROM countries WHERE id = ? LIMIT 1`,
+      [id]
+    );
+    if (!country) {
       return null;
     }
-  };
 
+    await db.runAsync(`DELETE FROM countries WHERE id = ?`, [id]);
+    return country;
+  } catch (error) {
+    console.error("Failed to delete country");
+
+    return null;
+  }
+};

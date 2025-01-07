@@ -54,6 +54,7 @@ export async function getEntryById(
 
 export async function insertEntry(
   db: SQLite.SQLiteDatabase,
+
   entry: Omit<Entry, "id">
 ): Promise<Entry | null> {
   try {
@@ -96,7 +97,13 @@ export async function insertEntry(
   } catch (error) {
     console.error("Error inserting entry:", error);
   }
+
   return null;
+}
+
+export interface School {
+  id: string;
+  status: string;
 }
 
 export async function getAllEntriesBySchool(
@@ -124,6 +131,26 @@ export async function getAllEntriesBySchool(
     return null;
   }
 }
+
+export const deleteEntryById = async (
+  db: SQLite.SQLiteDatabase,
+  id: string
+): Promise<Entry | null> => {
+  try {
+    const entry = await db.getFirstAsync<Entry>(
+      `SELECT * FROM entries WHERE id = ? LIMIT 1`,
+      [id]
+    );
+    if (!entry) {
+      return null;
+    }
+    await db.runAsync(`DELETE FROM entries WHERE id = ?`, [id]);
+    return entry;
+  } catch (error) {
+    console.error("Fail to delete entry by id.");
+    return null;
+  }
+};
 
 export async function editEntry(
   db: SQLite.SQLiteDatabase,
@@ -173,7 +200,7 @@ export async function editEntry(
         newEntry.num_children,
         newEntry.num_parents,
         entryId,
-        schoolId
+        schoolId,
       ]
     );
 

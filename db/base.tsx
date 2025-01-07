@@ -16,6 +16,7 @@ import {
   getAllEntriesBySchool,
   insertEntry,
   editEntry,
+  deleteEntryById,
   getEntryById
 } from "./entry";
 
@@ -50,6 +51,7 @@ export interface Entry {
   program_type: string;
   num_children: string;
   num_parents: string;
+  school: string;
 }
 
 export class DatabaseService {
@@ -235,12 +237,23 @@ export class DatabaseService {
     }
   }
 
+
   async editEntry(schoolId: string, entryId: string, newEntry: Entry): Promise<Entry | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
       return await editEntry(this.db, schoolId, entryId, newEntry);
     } catch (err) {
       console.error("Error editing entry by schoolId:", err);
+      return null;
+    }
+  }
+
+  async deleteEntryById(id: string): Promise<Entry | null> {
+    try {
+      if (!this.db) throw new Error("db not initialized");
+      return await deleteEntryById(this.db, id);
+    } catch (err) {
+      console.error("error getting entry by id", err);
       return null;
     }
   }
