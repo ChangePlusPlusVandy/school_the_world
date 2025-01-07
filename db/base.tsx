@@ -15,7 +15,8 @@ import {
 import {
   getAllEntriesBySchool,
   insertEntry,
-  editEntry
+  editEntry,
+  getEntryById
 } from "./entry";
 
 export interface Country {
@@ -59,11 +60,36 @@ export class DatabaseService {
       this.db = await SQLite.openDatabaseAsync("local.db");
 
       await this.db.execAsync(`
-                CREATE TABLE IF NOT EXISTS countries(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
-                )
-            `);
+        CREATE TABLE IF NOT EXISTS countries(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL
+        )
+      `);
+
+      await this.db.execAsync(`
+        CREATE TABLE IF NOT EXISTS entries(
+          id TEXT PRIMARY KEY,
+          arrival_date TEXT NOT NULL,
+          arrival_time TEXT NOT NULL,
+          time_teachers_arrive TEXT NOT NULL,
+          time_children_leave TEXT NOT NULL,
+          time_classes_start TEXT NOT NULL,
+          time_classes_end TEXT NOT NULL,
+          recess_time TEXT NOT NULL,
+          num_hours_children TEXT NOT NULL,
+          num_teachers_absent TEXT NOT NULL,
+          cleanliness TEXT NOT NULL,
+          playground_used INTEGER NOT NULL,
+          sinks_used INTEGER NOT NULL,
+          classroom_decor TEXT NOT NULL,
+          classrooms_used INTEGER NOT NULL,
+          observations TEXT NOT NULL,
+          program_type TEXT NOT NULL,
+          num_children TEXT NOT NULL,
+          num_parents TEXT NOT NULL,
+          school TEXT NOT NULL
+        )
+      `);
 
       console.log("db initialized successfully");
     } catch (err) {
@@ -71,6 +97,17 @@ export class DatabaseService {
     }
   }
 
+  async getEntryById(id: string): Promise<Entry | null> {
+    try {
+      if (!this.db) throw new Error("db not initialized");
+      return await getEntryById(this.db, id);
+    } catch (err) {
+      console.error("error getting entry by id:", err);
+      return null;
+    }
+  }
+
+  // Keep all existing methods
   async addCountry(countryName: string): Promise<Country | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
@@ -106,15 +143,15 @@ export class DatabaseService {
   }
 
   async createEntry(entry: Omit<Entry, "id">): Promise<Entry | null> {
-        try {
-          if (!this.db) throw new Error("Database not initialized");
-          return await insertEntry(this.db, entry);
-        } catch (error) {
-          console.error("Error creating entry:", error);
-          return null;
-        }
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      return await insertEntry(this.db, entry);
+    } catch (error) {
+      console.error("Error creating entry:", error);
+      return null;
     }
-    
+  }
+
   async addCommunity(
     communityName: string,
     countryName: string,
@@ -198,7 +235,7 @@ export class DatabaseService {
     }
   }
 
-  async editEntry(schoolId: string, entryId:string, newEntry: Entry): Promise<Entry | null> {
+  async editEntry(schoolId: string, entryId: string, newEntry: Entry): Promise<Entry | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
       return await editEntry(this.db, schoolId, entryId, newEntry);

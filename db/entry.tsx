@@ -23,9 +23,38 @@ export interface Entry {
   school: string;
 }
 
+export interface School {
+  id: string;
+  status: string;
+}
+
+export async function getEntryById(
+  db: SQLite.SQLiteDatabase,
+  id: string
+): Promise<Entry | null> {
+  try {
+    const result = await db.getFirstAsync<any>(
+      `SELECT * FROM entries WHERE id = ?`,
+      [id]
+    );
+
+    if (!result) return null;
+
+    return {
+      ...result,
+      playground_used: Boolean(result.playground_used),
+      sinks_used: Boolean(result.sinks_used),
+      classrooms_used: Boolean(result.classrooms_used),
+    };
+  } catch (error) {
+    console.error("Error getting entry by id:", error);
+    return null;
+  }
+}
+
 export async function insertEntry(
   db: SQLite.SQLiteDatabase,
-  entry: Omit<Entry, "id">, // sqlite generated id
+  entry: Omit<Entry, "id">
 ): Promise<Entry | null> {
   try {
     const result = await db.runAsync(
@@ -36,7 +65,7 @@ export async function insertEntry(
         cleanliness, playground_used, sinks_used, 
         classroom_decor, classrooms_used, observations, 
         program_type, num_children, num_parents, school
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         entry.arrival_date,
         entry.arrival_time,
@@ -48,33 +77,26 @@ export async function insertEntry(
         entry.num_hours_children,
         entry.num_teachers_absent,
         entry.cleanliness,
-        entry.playground_used ? 1 : 0, 
-        entry.sinks_used ? 1 : 0,    
+        entry.playground_used ? 1 : 0,
+        entry.sinks_used ? 1 : 0,
         entry.classroom_decor,
-        entry.classrooms_used ? 1 : 0, 
+        entry.classrooms_used ? 1 : 0,
         entry.observations,
         entry.program_type,
         entry.num_children,
         entry.num_parents,
-        entry.school, 
+        entry.school,
       ]
     );
 
     if (result.changes > 0) {
-      const id = result.lastInsertRowId.toString(); // id from sqlite
-
+      const id = result.lastInsertRowId.toString();
       return { ...entry, id };
     }
   } catch (error) {
     console.error("Error inserting entry:", error);
   }
-
-  return null; 
-}
-
-export interface School {
-  id: string;
-  status: string;
+  return null;
 }
 
 export async function getAllEntriesBySchool(
@@ -82,17 +104,15 @@ export async function getAllEntriesBySchool(
   id: string
 ): Promise<Entry[] | null> {
   try {
-    // First, get the school information
     const school = await db.getFirstAsync<Omit<School, "entries">>(
       `SELECT * FROM schools WHERE _id = ?`,
       [id]
     );
 
     if (!school) {
-      return null; // School not found
+      return null;
     }
 
-    // Then, get all entries associated with this school
     const entries = await db.getAllAsync<Entry>(
       `SELECT * FROM entries WHERE school = ?`,
       [id]
@@ -131,7 +151,7 @@ export async function editEntry(
         observations = ?,
         program_type = ?,
         num_children = ?,
-        num_parents = ?,
+        num_parents = ?
       WHERE id = ? AND school_id = ?`,
       [
         newEntry.arrival_date,
@@ -144,10 +164,10 @@ export async function editEntry(
         newEntry.num_hours_children,
         newEntry.num_teachers_absent,
         newEntry.cleanliness,
-        newEntry.playground_used,
-        newEntry.sinks_used,
+        newEntry.playground_used ? 1 : 0,
+        newEntry.sinks_used ? 1 : 0,
         newEntry.classroom_decor,
-        newEntry.classrooms_used,
+        newEntry.classrooms_used ? 1 : 0,
         newEntry.observations,
         newEntry.program_type,
         newEntry.num_children,
@@ -156,11 +176,13 @@ export async function editEntry(
         schoolId
       ]
     );
-  
+
     if (result.changes > 0) {
-      return newEntry; 
+      return newEntry;
     }
-  
+    return null;
+  } catch (error) {
+    console.error("Error editing entry:", error);
     return null;
   }
 }
