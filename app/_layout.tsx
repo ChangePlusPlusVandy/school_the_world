@@ -1,9 +1,15 @@
-import { Stack } from "expo-router";
+// app/layout.tsx
+import { Tabs } from 'expo-router';
 
-export default function RootLayout() {
+export default function Layout() {
   return (
-    <Stack>
-      <Stack.Screen name="index" />
-    </Stack>
+    <Tabs
+      screenOptions={{
+        headerShown: true
+        // Add any global tab options here
+      }}
+    >
+      {/* Tab configurations will be auto-generated from your file structure */}
+    </Tabs>
   );
 }
