@@ -11,6 +11,9 @@ export default function Index() {
         <Link href="/data_tracking">
           Go to Data Tracking
         </Link>
+        <Link href="/school_info">
+          Go to School Info Page
+        </Link>
       </TouchableOpacity>
     </View>
   );
