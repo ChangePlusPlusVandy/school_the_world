@@ -9,34 +9,103 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
+type Time = {
+  hour: string;
+  minute: string;
+  period: string;
+};
+
+type State = {
+  date: {
+    month: string;
+    day: string;
+    year: string;
+  };
+  times: {
+    arrivalTime: Time;
+    teacherArrivalTime: Time;
+    childrenArrivalTime: Time;
+    classStartTime: Time;
+    classEndTime: Time;
+  };
+  recessDropdown: boolean;
+  schoolTimeDropdown: boolean;
+  teacherDropdown: boolean;
+  programType: string;
+  numChildren: string;
+  numParents: string;
+  absentTeachers: string;
+  cleanliness: number;
+  playgroundUse: string;
+  recessTime: string;
+  schoolTime: string;
+  sinkUse: string;
+  decorationUse: string;
+  classroomUse: string;
+  observations: string;
+};
+
 export default function SchoolInfo() {
   const handleBack = () => console.log("Back button pressed");
   const handleHome = () => console.log("Home button pressed");
   const handleShare = () => console.log("Share button pressed");
 
-  const [month, setMonth] = useState("");
-  const [day, setDay] = useState("");
-  const [year, setYear] = useState("");
-  const [arrivalTime, setArrivalTime] = useState("");
-  const [teacherArrivalTime, setTeacherArrivalTime] = useState("");
-  const [childrenArrivalTime, setChildrenArrivalTime] = useState("");
-  const [classStartTime, setClassStartTime] = useState("");
-  const [classEndTime, setClassEndTime] = useState("");
-  const [recessDropdown, setRecessDropdown] = useState(false);
-  const [schoolTimeDropdown, setSchoolTimeDropdown] = useState(false);
-  const [teacherDropdown, setTeacherDropdown] = useState(false);
-  const [programType, setProgramType] = useState("");
-  const [numChildren, setNumChildren] = useState("");
-  const [numParents, setNumParents] = useState("");
-  const [recessTime, setRecessTime] = useState("");
-  const [schoolTime, setSchoolTime] = useState("");
-  const [absentTeachers, setAbsentTeachers] = useState("");
-  const [cleanliness, setCleanliness] = useState(0);
-  const [playgroundUse, setPlaygroundUse] = useState("");
-  const [sinkUse, setSinkUse] = useState("");
-  const [decorationUse, setDecorationUse] = useState("");
-  const [classroomUse, setClassroomUse] = useState("");
-  const [observations, setObservations] = useState("");
+  const [state, setState] = useState({
+    date: {
+      month: "",
+      day: "",
+      year: "",
+    },
+    times: {
+      arrivalTime: { hour: "", minute: "", period: "AM" },
+      teacherArrivalTime: { hour: "", minute: "", period: "AM" },
+      childrenArrivalTime: { hour: "", minute: "", period: "AM" },
+      classStartTime: { hour: "", minute: "", period: "AM" },
+      classEndTime: { hour: "", minute: "", period: "PM" },
+    },
+    recessDropdown: false,
+    schoolTimeDropdown: false,
+    teacherDropdown: false,
+    programType: "",
+    numChildren: "",
+    numParents: "",
+    absentTeachers: "",
+    cleanliness: 0,
+    playgroundUse: "",
+    recessTime: "",
+    schoolTime: "",
+    sinkUse: "",
+    decorationUse: "",
+    classroomUse: "",
+    observations: "",
+  });
+
+  const handleInputChange = (name: keyof State, value: any) => {
+    setState((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleNestedInputChange = (
+    category: keyof State,
+    subcategory: string,
+    field: string,
+    value: string
+  ) => {
+    setState((prevState) => ({
+      ...prevState,
+      [category]: {
+        ...prevState[category],
+        [subcategory]: field
+          ? {
+              ...prevState[category][subcategory],
+              [field]: value,
+            }
+          : value,
+      },
+    }));
+  };
 
   const recessTimes = [
     "10",
@@ -52,6 +121,7 @@ export default function SchoolInfo() {
     "60",
   ];
   const count = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+  const cleanlinessOptions = [1, 2, 3, 4, 5];
   const programTypeOptions = ["Early Childhood", "Primary", "Middle"];
   const usageOptions = ["Yes", "No", "This observation could not be made"];
   const decorationOptions = [
@@ -61,6 +131,44 @@ export default function SchoolInfo() {
     "No, none",
   ];
 
+  const clearForm = () => {
+    setState({
+      date: {
+        month: "",
+        day: "",
+        year: "",
+      },
+      times: {
+        arrivalTime: { hour: "", minute: "", period: "AM" },
+        teacherArrivalTime: { hour: "", minute: "", period: "AM" },
+        childrenArrivalTime: { hour: "", minute: "", period: "AM" },
+        classStartTime: { hour: "", minute: "", period: "AM" },
+        classEndTime: { hour: "", minute: "", period: "PM" },
+      },
+      recessDropdown: false,
+      schoolTimeDropdown: false,
+      teacherDropdown: false,
+      programType: "",
+      numChildren: "",
+      numParents: "",
+      absentTeachers: "",
+      cleanliness: 0,
+      playgroundUse: "",
+      recessTime: "",
+      schoolTime: "",
+      sinkUse: "",
+      decorationUse: "",
+      classroomUse: "",
+      observations: "",
+    });
+  };
+
+  {
+    /* change this to do something with the data */
+  }
+  const submitForm = () => {
+    console.log("Form submitted with data:", state);
+  };
   return (
     <View style={styles.container}>
       {/* Header, change to a common header in the future  */}
@@ -92,11 +200,13 @@ export default function SchoolInfo() {
         <Text style={styles.sectionTitle}>Create a New Entry</Text>
         {/* Arrival Date */}
         <View style={styles.entryBox}>
-          <Text style={styles.entryLabel}>Arrival Date:</Text>
+          <Text>Arrival Date:</Text>
           <View style={styles.dateInputContainer}>
             <TextInput
-              value={month}
-              onChangeText={setMonth}
+              value={state.date.month}
+              onChangeText={(text) =>
+                handleNestedInputChange("date", "month", "", text)
+              }
               placeholder="MM"
               keyboardType="numeric"
               maxLength={2}
@@ -104,8 +214,10 @@ export default function SchoolInfo() {
             />
             <Text style={styles.separator}>/</Text>
             <TextInput
-              value={day}
-              onChangeText={setDay}
+              value={state.date.day}
+              onChangeText={(text) =>
+                handleNestedInputChange("date", "day", "", text)
+              }
               placeholder="DD"
               keyboardType="numeric"
               maxLength={2}
@@ -113,8 +225,10 @@ export default function SchoolInfo() {
             />
             <Text style={styles.separator}>/</Text>
             <TextInput
-              value={year}
-              onChangeText={setYear}
+              value={state.date.year}
+              onChangeText={(text) =>
+                handleNestedInputChange("date", "year", "", text)
+              }
               placeholder="YYYY"
               keyboardType="numeric"
               maxLength={4}
@@ -125,13 +239,51 @@ export default function SchoolInfo() {
         {/* Arrival Time */}
         <View style={styles.entryBox}>
           <Text style={styles.entryLabel}>Arrival Time</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="__:__ AM"
-            value={arrivalTime}
-            onChangeText={setArrivalTime}
-          />
+          <View style={styles.timeInputContainer}>
+            <TextInput
+              value={state.times.arrivalTime.hour}
+              onChangeText={(text) =>
+                handleNestedInputChange("times", "arrivalTime", "hour", text)
+              }
+              placeholder="HH"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <Text style={styles.separator}>:</Text>
+            <TextInput
+              value={state.times.arrivalTime.minute}
+              onChangeText={(text) =>
+                handleNestedInputChange("times", "arrivalTime", "minute", text)
+              }
+              placeholder="MM"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() =>
+                setState((prev) => ({
+                  ...prev,
+                  times: {
+                    ...prev.times,
+                    arrivalTime: {
+                      ...prev.times.arrivalTime,
+                      period:
+                        prev.times.arrivalTime.period === "AM" ? "PM" : "AM",
+                    },
+                  },
+                }))
+              }
+            >
+              <Text style={styles.dropdownText}>
+                {state.times.arrivalTime.period}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
         {/* Program Type */}
         <View style={styles.entryBox}>
           <Text style={styles.entryLabel}>Program Type</Text>
@@ -139,10 +291,10 @@ export default function SchoolInfo() {
             <TouchableOpacity
               key={index}
               style={styles.radioItem}
-              onPress={() => setProgramType(option)}
+              onPress={() => handleInputChange("programType", option)}
             >
               <View style={styles.radioCircle}>
-                {programType === option && (
+                {state.programType === option && (
                   <View style={styles.radioSelected} />
                 )}
               </View>
@@ -156,8 +308,8 @@ export default function SchoolInfo() {
           <TextInput
             style={styles.input}
             placeholder="Enter a number"
-            value={numChildren}
-            onChangeText={setNumChildren}
+            value={state.numChildren}
+            onChangeText={(text) => handleInputChange("numChildren", text)}
           />
         </View>
         {/* Number of Parents */}
@@ -166,68 +318,250 @@ export default function SchoolInfo() {
           <TextInput
             style={styles.input}
             placeholder="Enter a number"
-            value={numParents}
-            onChangeText={setNumParents}
+            value={state.numParents}
+            onChangeText={(text) => handleInputChange("numParents", text)}
           />
         </View>
         {/* Teacher Arrival Time */}
         <View style={styles.entryBox}>
-          <Text style={styles.entryLabel}>Time Teachers Arrive to School</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="__:__ AM"
-            value={teacherArrivalTime}
-            onChangeText={setTeacherArrivalTime}
-          />
+          <Text style={styles.entryLabel}>Time teachers arrive to school</Text>
+          <View style={styles.timeInputContainer}>
+            <TextInput
+              value={state.times.teacherArrivalTime.hour}
+              onChangeText={(text) =>
+                handleNestedInputChange(
+                  "times",
+                  "teacherArrivalTime",
+                  "hour",
+                  text
+                )
+              }
+              placeholder="HH"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <Text style={styles.separator}>:</Text>
+            <TextInput
+              value={state.times.teacherArrivalTime.minute}
+              onChangeText={(text) =>
+                handleNestedInputChange(
+                  "times",
+                  "teacherArrivalTime",
+                  "minute",
+                  text
+                )
+              }
+              placeholder="MM"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() =>
+                setState((prev) => ({
+                  ...prev,
+                  times: {
+                    ...prev.times,
+                    teacherArrivalTime: {
+                      ...prev.times.teacherArrivalTime,
+                      period:
+                        prev.times.teacherArrivalTime.period === "AM"
+                          ? "PM"
+                          : "AM",
+                    },
+                  },
+                }))
+              }
+            >
+              <Text style={styles.dropdownText}>
+                {state.times.teacherArrivalTime.period}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         {/* Children Arrival Time */}
         <View style={styles.entryBox}>
-          <Text style={styles.entryLabel}>Time Children Arrive to School</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="__:__ AM"
-            value={childrenArrivalTime}
-            onChangeText={setChildrenArrivalTime}
-          />
+          <Text style={styles.entryLabel}>Time children arrive to school</Text>
+          <View style={styles.timeInputContainer}>
+            <TextInput
+              value={state.times.childrenArrivalTime.hour}
+              onChangeText={(text) =>
+                handleNestedInputChange(
+                  "times",
+                  "childrenArrivalTime",
+                  "hour",
+                  text
+                )
+              }
+              placeholder="HH"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <Text style={styles.separator}>:</Text>
+            <TextInput
+              value={state.times.childrenArrivalTime.minute}
+              onChangeText={(text) =>
+                handleNestedInputChange(
+                  "times",
+                  "childrenArrivalTime",
+                  "minute",
+                  text
+                )
+              }
+              placeholder="MM"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() =>
+                setState((prev) => ({
+                  ...prev,
+                  times: {
+                    ...prev.times,
+                    childrenArrivalTime: {
+                      ...prev.times.childrenArrivalTime,
+                      period:
+                        prev.times.childrenArrivalTime.period === "AM"
+                          ? "PM"
+                          : "AM",
+                    },
+                  },
+                }))
+              }
+            >
+              <Text style={styles.dropdownText}>
+                {state.times.childrenArrivalTime.period}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
         {/* Class Start Time */}
         <View style={styles.entryBox}>
           <Text style={styles.entryLabel}>Time Classes Start</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="__:__ AM"
-            value={classStartTime}
-            onChangeText={setClassStartTime}
-          />
+          <View style={styles.timeInputContainer}>
+            <TextInput
+              value={state.times.classStartTime.hour}
+              onChangeText={(text) =>
+                handleNestedInputChange("times", "classStartTime", "hour", text)
+              }
+              placeholder="HH"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <Text style={styles.separator}>:</Text>
+            <TextInput
+              value={state.times.classStartTime.minute}
+              onChangeText={(text) =>
+                handleNestedInputChange(
+                  "times",
+                  "classStartTime",
+                  "minute",
+                  text
+                )
+              }
+              placeholder="MM"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() =>
+                setState((prev) => ({
+                  ...prev,
+                  times: {
+                    ...prev.times,
+                    classStartTime: {
+                      ...prev.times.classStartTime,
+                      period:
+                        prev.times.classStartTime.period === "AM" ? "PM" : "AM",
+                    },
+                  },
+                }))
+              }
+            >
+              <Text style={styles.dropdownText}>
+                {state.times.classStartTime.period}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
         {/* Class End Time */}
         <View style={styles.entryBox}>
           <Text style={styles.entryLabel}>Time Classes End</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="__:__ PM"
-            value={classEndTime}
-            onChangeText={setClassEndTime}
-          />
+          <View style={styles.timeInputContainer}>
+            <TextInput
+              value={state.times.classEndTime.hour}
+              onChangeText={(text) =>
+                handleNestedInputChange("times", "classEndTime", "hour", text)
+              }
+              placeholder="HH"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <Text style={styles.separator}>:</Text>
+            <TextInput
+              value={state.times.classEndTime.minute}
+              onChangeText={(text) =>
+                handleNestedInputChange("times", "classEndTime", "minute", text)
+              }
+              placeholder="MM"
+              keyboardType="numeric"
+              maxLength={2}
+              style={styles.timeInput}
+            />
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() =>
+                setState((prev) => ({
+                  ...prev,
+                  times: {
+                    ...prev.times,
+                    classEndTime: {
+                      ...prev.times.classEndTime,
+                      period:
+                        prev.times.classEndTime.period === "AM" ? "PM" : "AM",
+                    },
+                  },
+                }))
+              }
+            >
+              <Text style={styles.dropdownText}>
+                {state.times.classEndTime.period}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
         {/* Dropdown for Recess Time */}
         <View style={styles.entryBox}>
           <Text style={styles.entryLabel}>Recess Time (Minutes)</Text>
           <TouchableOpacity
             style={styles.dropdown}
-            onPress={() => setRecessDropdown(!recessDropdown)}
+            onPress={() =>
+              handleInputChange("recessDropdown", !state.recessDropdown)
+            }
           >
-            <Text style={styles.dropdownText}>{recessTime}</Text>
+            <Text style={styles.dropdownText}>{state.recessTime}</Text>
           </TouchableOpacity>
-          {recessDropdown && (
+          {state.recessDropdown && (
             <View style={styles.dropdownList}>
               {recessTimes.map((time, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.dropdownItem}
                   onPress={() => {
-                    setRecessTime(time);
-                    setRecessDropdown(false);
+                    handleInputChange("recessTime", time);
+                    handleInputChange("recessDropdown", false);
                   }}
                 >
                   <Text>{time}</Text>
@@ -241,19 +575,21 @@ export default function SchoolInfo() {
           <Text style={styles.entryLabel}>School Time (Hours)</Text>
           <TouchableOpacity
             style={styles.dropdown}
-            onPress={() => setSchoolTimeDropdown(!schoolTimeDropdown)}
+            onPress={() =>
+              handleInputChange("schoolTimeDropdown", !state.schoolTimeDropdown)
+            }
           >
-            <Text style={styles.dropdownText}>{schoolTime}</Text>
+            <Text style={styles.dropdownText}>{state.schoolTime}</Text>
           </TouchableOpacity>
-          {schoolTimeDropdown && (
+          {state.schoolTimeDropdown && (
             <View style={styles.dropdownList}>
               {count.map((c, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.dropdownItem}
                   onPress={() => {
-                    setSchoolTime(c);
-                    setSchoolTimeDropdown(false);
+                    handleInputChange("schoolTime", c);
+                    handleInputChange("schoolTimeDropdown", false);
                   }}
                 >
                   <Text>{c}</Text>
@@ -264,22 +600,24 @@ export default function SchoolInfo() {
         </View>
         {/* Teachers absent */}
         <View style={styles.entryBox}>
-          <Text style={styles.entryLabel}>Time in school (Hours)</Text>
+          <Text style={styles.entryLabel}>Number of teachers absent</Text>
           <TouchableOpacity
             style={styles.dropdown}
-            onPress={() => setTeacherDropdown(!teacherDropdown)}
+            onPress={() =>
+              handleInputChange("teacherDropdown", !state.teacherDropdown)
+            }
           >
-            <Text style={styles.dropdownText}>{absentTeachers}</Text>
+            <Text style={styles.dropdownText}>{state.absentTeachers}</Text>
           </TouchableOpacity>
-          {teacherDropdown && (
+          {state.teacherDropdown && (
             <View style={styles.dropdownList}>
               {count.map((c, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.dropdownItem}
                   onPress={() => {
-                    setAbsentTeachers(c);
-                    setTeacherDropdown(false);
+                    handleInputChange("absentTeachers", c);
+                    handleInputChange("teacherDropdown", false);
                   }}
                 >
                   <Text>{c}</Text>
@@ -288,6 +626,26 @@ export default function SchoolInfo() {
             </View>
           )}
         </View>
+        {/* Cleanliness */}
+        <View style={styles.entryBox}>
+          <Text style={styles.entryLabel}>School cleanliness</Text>
+          <Text style={styles.cleanlinessText}>Not Clean</Text>
+          {cleanlinessOptions.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.radioItem}
+              onPress={() => handleInputChange("cleanliness", option)}
+            >
+              <Text style={styles.radioTextSecondary}>{option}</Text>
+              <View style={styles.radioCircle}>
+                {state.cleanliness === option && (
+                  <View style={styles.radioSelected} />
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
+          <Text style={styles.cleanlinessText}>Clean</Text>
+        </View>
         {/* Playground Use */}
         <View style={styles.entryBox}>
           <Text style={styles.entryLabel}>Was the playground used?</Text>
@@ -295,10 +653,10 @@ export default function SchoolInfo() {
             <TouchableOpacity
               key={index}
               style={styles.radioItem}
-              onPress={() => setPlaygroundUse(option)}
+              onPress={() => handleInputChange("playgroundUse", option)}
             >
               <View style={styles.radioCircle}>
-                {playgroundUse === option && (
+                {state.playgroundUse === option && (
                   <View style={styles.radioSelected} />
                 )}
               </View>
@@ -313,10 +671,12 @@ export default function SchoolInfo() {
             <TouchableOpacity
               key={index}
               style={styles.radioItem}
-              onPress={() => setSinkUse(option)}
+              onPress={() => handleInputChange("sinkUse", option)}
             >
               <View style={styles.radioCircle}>
-                {sinkUse === option && <View style={styles.radioSelected} />}
+                {state.sinkUse === option && (
+                  <View style={styles.radioSelected} />
+                )}
               </View>
               <Text style={styles.radioText}>{option}</Text>
             </TouchableOpacity>
@@ -329,10 +689,10 @@ export default function SchoolInfo() {
             <TouchableOpacity
               key={index}
               style={styles.radioItem}
-              onPress={() => setDecorationUse(option)}
+              onPress={() => handleInputChange("decorationUse", option)}
             >
               <View style={styles.radioCircle}>
-                {decorationUse === option && (
+                {state.decorationUse === option && (
                   <View style={styles.radioSelected} />
                 )}
               </View>
@@ -349,10 +709,10 @@ export default function SchoolInfo() {
             <TouchableOpacity
               key={index}
               style={styles.radioItem}
-              onPress={() => setClassroomUse(option)}
+              onPress={() => handleInputChange("classroomUse", option)}
             >
               <View style={styles.radioCircle}>
-                {classroomUse === option && (
+                {state.classroomUse === option && (
                   <View style={styles.radioSelected} />
                 )}
               </View>
@@ -368,13 +728,18 @@ export default function SchoolInfo() {
           <TextInput
             style={styles.input}
             placeholder="Enter observations"
-            value={observations}
-            onChangeText={setObservations}
+            value={state.observations}
+            onChangeText={(text) => handleInputChange("observations", text)}
           />
         </View>
-        <View style={styles.submitButton}>
-          <TouchableOpacity style={styles.submitButton}>
+
+        {/* Submit Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.submitButton} onPress={submitForm}>
             <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.linkButton} onPress={clearForm}>
+            <Text style={styles.linkButtonText}>Clear Form</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -397,7 +762,7 @@ const styles = StyleSheet.create({
   dateInput: {
     borderBottomWidth: 1,
     borderColor: "#000",
-    width: 60,
+    width: 40,
     height: 40,
     textAlign: "center",
   },
@@ -521,19 +886,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#374151",
   },
+  radioTextSecondary: {
+    paddingLeft: 50,
+    paddingRight: 20,
+    fontSize: 16,
+    color: "#374151",
+  },
+  cleanlinessText: {
+    paddingTop: 10,
+    paddingLeft: 15,
+    fontSize: 16,
+    color: "#374151",
+    marginBottom: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    top: 10,
+    right: 0,
+  },
   submitButton: {
-    backgroundColor: "#0000FF", // Blue color
-    width: "30%", // Smaller width
-    height: 40, // Smaller height
+    backgroundColor: "#0f1741",
+    width: 100,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 15,
-    marginBottom: 20,
-    alignSelf: "flex-start", // Float to the left
+    borderRadius: 5,
+    marginRight: 150,
   },
   submitButtonText: {
     color: "#ffffff",
     fontSize: 16,
     textAlign: "center",
+  },
+  linkButton: {
+    padding: 10,
+  },
+  linkButtonText: {
+    color: "grey",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  timeInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  timeInput: {
+    borderBottomWidth: 1,
+    borderColor: "#000",
+    width: 40,
+    height: 40,
+    textAlign: "center",
+    marginHorizontal: 5,
   },
 });
