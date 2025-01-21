@@ -8,7 +8,12 @@ export default function Index() {
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <MaterialIcons name="home-filled" size={50} />
       <TouchableOpacity>
-        <Link href="/data_tracking">Go to Data Tracking</Link>
+        <Link href="/data_tracking">
+          Go to Data Tracking
+        </Link>
+        <Link href="/school_info">
+          Go to School Info Page
+        </Link>
       </TouchableOpacity>
     </View>
   );
