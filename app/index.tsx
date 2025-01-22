@@ -1,6 +1,6 @@
-import { StyleSheet, View, Text, Pressable } from "react-native"
-import { Link } from "expo-router"
-import { Feather, MaterialIcons } from "@expo/vector-icons"
+import { StyleSheet, View, Text, Pressable } from "react-native";
+import { Link } from "expo-router";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 
 export default function Homepage() {
   return (
@@ -37,7 +37,7 @@ export default function Homepage() {
         </Pressable>
       </Link>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -91,5 +91,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "gray",
   },
-})
-
+});

@@ -1,11 +1,11 @@
 // app/layout.tsx
-import { Tabs } from 'expo-router';
+import { Tabs } from "expo-router";
 
 export default function Layout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true
+        headerShown: true,
         // Add any global tab options here
       }}
     >

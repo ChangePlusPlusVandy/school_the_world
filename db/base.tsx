@@ -17,7 +17,7 @@ import {
   insertEntry,
   editEntry,
   deleteEntryById,
-  getEntryById
+  getEntryById,
 } from "./entry";
 
 export interface Country {
@@ -237,8 +237,11 @@ export class DatabaseService {
     }
   }
 
-
-  async editEntry(schoolId: string, entryId: string, newEntry: Entry): Promise<Entry | null> {
+  async editEntry(
+    schoolId: string,
+    entryId: string,
+    newEntry: Entry
+  ): Promise<Entry | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
       return await editEntry(this.db, schoolId, entryId, newEntry);
