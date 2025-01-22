@@ -7,12 +7,14 @@ export default function Choose_Annual_Filtered () {
     return (
         <View style={styles.container}>
             {/* top line */}
-            <MaterialIcons name="arrow-back" style={{width: 20, height: 20, marginTop: 40, marginRight: 450}} size={30}/>
-            <MaterialIcons name="home-filled" style={{marginBottom: 20}} size={50}/>
+            <View style={styles.home_back_row}>
+                <MaterialIcons name="arrow-back" size={30} style={{paddingRight: 150}}/>
+                <MaterialIcons name="home-filled" style={{marginBottom: 20}} size={50}/>
+            </View>
 
             {/* title section */}
             <View style={styles.titleContainer}>
-            <Text style={styles.titleText}>Choose Type</Text>
+                <Text style={styles.titleText}>Choose Type</Text>
             </View>
 
             {/* Annual data link */}
@@ -32,9 +34,15 @@ export default function Choose_Annual_Filtered () {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-    //   justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#EFF2F7'
+    },
+
+    home_back_row: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        // backgroundColor: 'red',
+        width: 400
     },
 
     backButton: {
