@@ -8,7 +8,7 @@ export default function Choose_Annual_Filtered () {
         <View style={styles.container}>
             {/* top line */}
             <View style={styles.home_back_row}>
-                <MaterialIcons name="arrow-back" size={30} style={{paddingRight: 150}}/>
+                <MaterialIcons name="arrow-back" size={30} style={{paddingRight: 110, paddingLeft: 40, paddingTop: 10}}/>
                 <MaterialIcons name="home-filled" style={{marginBottom: 20}} size={50}/>
             </View>
 
