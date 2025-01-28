@@ -1,15 +1,17 @@
 // app/school_selection.tsx
 
+import React, { useState, useEffect } from "react";
 import {
+  StyleSheet,
   View,
   Text,
+  Pressable,
   TextInput,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { useState, useEffect } from "react";
+
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function SchoolPage() {
   const [schools, setSchools] = useState<string[]>([]);
@@ -20,59 +22,98 @@ export default function SchoolPage() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#F8F9FD" }}>
-      <View style={{ flexDirection: "row", alignItems: "center", padding: 16 }}>
-        <TouchableOpacity>
-          <MaterialIcons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View style={{ flex: 1, alignItems: "center" }}>
-          <Link href="/">
-            <MaterialIcons name="home-filled" size={24} color="black" />
-          </Link>
-        </View>
-        <TouchableOpacity>
-          <MaterialIcons name="file-upload" size={24} color="black" />
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Pressable style={styles.iconContainer}>
+          <MaterialIcons name="arrow-back" size={24} color="darkblue" />
+        </Pressable>
+        <Link href="/" asChild>
+          <Pressable>
+            <MaterialIcons name="home" size={48} color="darkblue" />
+          </Pressable>
+        </Link>
+        <Pressable style={styles.iconContainer}>
+          <MaterialIcons name="file-upload" size={24} color="darkblue" />
+        </Pressable>
       </View>
-
-      <View style={{ alignItems: "center", marginVertical: 16 }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Choose School</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <TextInput
-          style={{
-            height: 40,
-            borderColor: "#ccc",
-            borderWidth: 1,
-            borderRadius: 8,
-            paddingHorizontal: 8,
-            marginBottom: 16,
-          }}
-          placeholder="Search..."
-        />
-
+      <Text style={styles.title}>Choose School</Text>
+      <TextInput style={styles.input} placeholder="Search..." />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {schools.map((school, index) => (
-          <Link
-            key={index}
-            href="/survey"
-            style={{ flex: 1, marginBottom: 12 }}
-          >
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#FFFFFF",
-                padding: 16,
-                borderRadius: 8,
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 16 }}>{school}</Text>
-            </TouchableOpacity>
+          <Link key={index} href="/survey" asChild>
+            <Pressable style={styles.card}>
+              <Text style={styles.cardTitle}>{school}</Text>
+            </Pressable>
           </Link>
         ))}
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f7fa",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 24,
+  },
+  iconContainer: {
+    backgroundColor: "#e8eaf6",
+    padding: 12,
+    borderRadius: 12,
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginTop: 24,
+    marginBottom: 32,
+    textAlign: "center",
+  },
+  input: {
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginBottom: 25,
+    width: "100%",
+  },
+  scrollContent: {
+    width: "100%",
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 16,
+    width: "100%",
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "darkblue",
+  },
+});
