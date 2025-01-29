@@ -88,24 +88,29 @@ export default function SchoolInfo() {
   };
 
   const handleNestedInputChange = (
-    category: keyof State,
-    subcategory: string,
-    field: string,
-    value: string
-  ) => {
-    setState((prevState) => ({
+  category: keyof State,
+  subcategory: string,
+  field: string,
+  value: string
+) => {
+  setState((prevState) => {
+    // Ensure category exists and is an object
+    const updatedCategory = { ...(prevState[category] as Record<string, any>) };
+
+    // Ensure subcategory exists and is an object
+    const updatedSubcategory = {
+      ...(updatedCategory[subcategory] ?? {}), // Ensure it exists
+      [field]: value, // Update the field
+    };
+
+    updatedCategory[subcategory] = updatedSubcategory; // Assign back to category
+
+    return {
       ...prevState,
-      [category]: {
-        ...prevState[category],
-        [subcategory]: field
-          ? {
-              ...prevState[category][subcategory],
-              [field]: value,
-            }
-          : value,
-      },
-    }));
-  };
+      [category]: updatedCategory, // Assign updated category back to state
+    };
+  });
+};
 
   const recessTimes = [
     "10",
@@ -190,8 +195,8 @@ export default function SchoolInfo() {
 
       {/* Main Content */}
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.schoolName}>SCHOOL NAME</Text>
-        <Text style={styles.schoolLocation}>Community, Country</Text>
+        <Text style={styles.schoolName}>Community Name</Text>
+        <Text style={styles.schoolLocation}>Country</Text>
         {/* Past Entries Button */}
         <TouchableOpacity style={styles.pastEntriesButton}>
           <Text style={styles.pastEntriesText}>Past Entries</Text>

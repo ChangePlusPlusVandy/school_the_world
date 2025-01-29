@@ -4,6 +4,8 @@ import { MaterialIcons } from "@expo/vector-icons"
 
 
 export default function DataTrackingCountry(){
+    
+    
     return(
         
         <View style={styles.container}>
@@ -15,13 +17,13 @@ export default function DataTrackingCountry(){
 
             <Text style={styles.title}>Choose Country</Text>
             <View style={styles.buttonContainer}>
-                <Link href="" style={styles.buttonLabels}>Guatemala</Link>
+                <Link href="/" style={styles.buttonLabels}>Guatemala</Link>
             </View>
             <View style={styles.buttonContainer}>
-                <Link href="" style={styles.buttonLabels}>Honduras</Link>
+                <Link href="/" style={styles.buttonLabels}>Honduras</Link>
             </View>
             <View style={styles.buttonContainer}>
-                <Link href="" style={styles.buttonLabels}>Panama</Link>
+                <Link href="/" style={styles.buttonLabels}>Panama</Link>
             </View>
         </View>
     )

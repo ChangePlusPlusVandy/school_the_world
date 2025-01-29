@@ -13,46 +13,15 @@ import {
   getAllCommunitiesByCountry,
 } from "./community";
 import {
-  getAllEntriesBySchool,
   insertEntry,
   editEntry,
   deleteEntryById,
   getEntryById
 } from "./entry";
 
-export interface Country {
-  id: number;
-  name: string;
-}
-
-export interface Community {
-  id: number;
-  name: string;
-  country: string;
-}
-
-export interface Entry {
-  id: string;
-  arrival_date: string;
-  arrival_time: string;
-  time_teachers_arrive: string;
-  time_children_leave: string;
-  time_classes_start: string;
-  time_classes_end: string;
-  recess_time: string;
-  num_hours_children: string;
-  num_teachers_absent: string;
-  cleanliness: string;
-  playground_used: boolean;
-  sinks_used: boolean;
-  classroom_decor: string;
-  classrooms_used: boolean;
-  observations: string;
-  program_type: string;
-  num_children: string;
-  num_parents: string;
-  school: string;
-}
+import { Country } from "./country";
+import { Community } from "./community";
+import { Entry } from "./entry";
 
 export class DatabaseService {
   private db: SQLite.SQLiteDatabase | null = null;
@@ -89,7 +58,9 @@ export class DatabaseService {
           program_type TEXT NOT NULL,
           num_children TEXT NOT NULL,
           num_parents TEXT NOT NULL,
-          school TEXT NOT NULL
+          country TEXT NOT NULL,
+          community TEXT NOT NULL,
+          program TEXT NOT NULL
         )
       `);
 
@@ -227,21 +198,12 @@ export class DatabaseService {
     }
   }
 
-  async getAllEntriesBySchool(schoolId: string): Promise<Entry[] | null> {
-    try {
-      if (!this.db) throw new Error("Database not initialized");
-      return await getAllEntriesBySchool(this.db, schoolId);
-    } catch (error) {
-      console.error("error getting all entries by school: ", error);
-      return null;
-    }
-  }
 
 
   async editEntry(schoolId: string, entryId: string, newEntry: Entry): Promise<Entry | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
-      return await editEntry(this.db, schoolId, entryId, newEntry);
+      return await editEntry(this.db, entryId, newEntry);
     } catch (err) {
       console.error("Error editing entry by schoolId:", err);
       return null;

@@ -1,15 +1,19 @@
 import { StyleSheet, View, Text, Pressable } from "react-native"
 import { Link } from "expo-router"
 import { Feather, MaterialIcons } from "@expo/vector-icons"
+import { createDatabase } from "@/db/base"
+import { useEffect } from "react"
 
 export default function Homepage() {
+
+
   return (
     <View style={styles.container}>
       <MaterialIcons name="home" size={32} color="darkblue" />
 
       <Text style={styles.title}>Choose Page</Text>
 
-      <Link href="/data_tracking_country" asChild>
+      <Link href="/country_list" asChild>
         <Pressable style={styles.card}>
           <View>
             <View style={styles.iconContainer}>

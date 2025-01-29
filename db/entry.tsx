@@ -20,13 +20,11 @@ export interface Entry {
   program_type: string;
   num_children: string;
   num_parents: string;
-  school: string;
+  country: string;
+  community: string;
+  program: string;
 }
 
-export interface School {
-  id: string;
-  status: string;
-}
 
 export async function getEntryById(
   db: SQLite.SQLiteDatabase,
@@ -65,8 +63,8 @@ export async function insertEntry(
         recess_time, num_hours_children, num_teachers_absent, 
         cleanliness, playground_used, sinks_used, 
         classroom_decor, classrooms_used, observations, 
-        program_type, num_children, num_parents, school
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        program_type, num_children, num_parents, country, community, program 
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         entry.arrival_date,
         entry.arrival_time,
@@ -86,7 +84,9 @@ export async function insertEntry(
         entry.program_type,
         entry.num_children,
         entry.num_parents,
-        entry.school,
+        entry.country,
+        entry.community,
+        entry.program
       ]
     );
 
@@ -99,37 +99,6 @@ export async function insertEntry(
   }
 
   return null;
-}
-
-export interface School {
-  id: string;
-  status: string;
-}
-
-export async function getAllEntriesBySchool(
-  db: SQLite.SQLiteDatabase,
-  id: string
-): Promise<Entry[] | null> {
-  try {
-    const school = await db.getFirstAsync<Omit<School, "entries">>(
-      `SELECT * FROM schools WHERE _id = ?`,
-      [id]
-    );
-
-    if (!school) {
-      return null;
-    }
-
-    const entries = await db.getAllAsync<Entry>(
-      `SELECT * FROM entries WHERE school = ?`,
-      [id]
-    );
-
-    return entries;
-  } catch (error) {
-    console.error("Error retrieving school and entries:", error);
-    return null;
-  }
 }
 
 export const deleteEntryById = async (
@@ -154,7 +123,6 @@ export const deleteEntryById = async (
 
 export async function editEntry(
   db: SQLite.SQLiteDatabase,
-  schoolId: string,
   entryId: string,
   newEntry: Entry
 ): Promise<Entry | null> {
@@ -179,7 +147,7 @@ export async function editEntry(
         program_type = ?,
         num_children = ?,
         num_parents = ?
-      WHERE id = ? AND school_id = ?`,
+      WHERE id = ?`,
       [
         newEntry.arrival_date,
         newEntry.arrival_time,
@@ -199,8 +167,7 @@ export async function editEntry(
         newEntry.program_type,
         newEntry.num_children,
         newEntry.num_parents,
-        entryId,
-        schoolId,
+        entryId
       ]
     );
 

@@ -1,4 +1,3 @@
-// app/school_selection.tsx
 
 import React, { useState, useEffect } from "react";
 import {
@@ -13,7 +12,7 @@ import { Link } from "expo-router";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
-export default function SchoolPage() {
+export default function CommunityList() {
   const [schools, setSchools] = useState<string[]>([]);
 
   useEffect(() => {
@@ -36,11 +35,11 @@ export default function SchoolPage() {
           <MaterialIcons name="file-upload" size={24} color="darkblue" />
         </Pressable>
       </View>
-      <Text style={styles.title}>Choose School</Text>
+      <Text style={styles.title}>Choose Community</Text>
       <TextInput style={styles.input} placeholder="Search..." />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {schools.map((school, index) => (
-          <Link key={index} href="/survey" asChild>
+          <Link key={index} href="/" asChild>
             <Pressable style={styles.card}>
               <Text style={styles.cardTitle}>{school}</Text>
             </Pressable>
