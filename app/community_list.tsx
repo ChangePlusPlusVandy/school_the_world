@@ -1,51 +1,109 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  StyleSheet,
   View,
   Text,
-  Pressable,
+  StyleSheet,
   TextInput,
+  TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { Link } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useSearchParams } from "expo-router/build/hooks";
 
-import { MaterialIcons } from "@expo/vector-icons";
+type Community = { id: number; name: string; country: string };
 
 export default function CommunityList() {
-  const [schools, setSchools] = useState<string[]>([]);
+  const country = useSearchParams().get("country") || "";
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
-    // Fetch schools based on the selected community
-    setSchools(Array.from({ length: 12 }, (_, index) => `School ${index + 1}`));
-  }, []);
+    fetchCommunities();
+  }, [country]);
+
+  const fetchCommunities = async () => {
+    const fakeCommunities: Community[] = [
+      { id: 1, name: "Longtanhu Park", country: "Guatemala" },
+      { id: 2, name: "Chongwenmen", country: "Guatemala" },
+      { id: 3, name: "Fuguiyuan No.1", country: "Guatemala" },
+      { id: 4, name: "Donghuashi Street", country: "Honduras" },
+      { id: 5, name: "Huashizaoyuan", country: "Honduras" },
+      { id: 6, name: "Temple of Heaven", country: "Honduras" },
+      { id: 7, name: "Forbidden City", country: "Panama" },
+      { id: 8, name: "Tiananmen", country: "Panama" },
+      { id: 9, name: "Yuyuantan Park", country: "Panama" },
+    ];
+    const filteredCommunities = fakeCommunities.filter(
+      (community) => community.country === country
+    );
+    setCommunities(filteredCommunities);
+  };
+
+  const filteredCommunities = communities.filter((community) =>
+    community.name.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.iconContainer}>
-          <MaterialIcons name="arrow-back" size={24} color="darkblue" />
-        </Pressable>
-        <Link href="/" asChild>
-          <Pressable>
-            <MaterialIcons name="home" size={48} color="darkblue" />
-          </Pressable>
-        </Link>
-        <Pressable style={styles.iconContainer}>
-          <MaterialIcons name="file-upload" size={24} color="darkblue" />
-        </Pressable>
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => router.push("/country_list")}>
+          <Ionicons name="chevron-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/")}>
+          <Ionicons name="home" size={24} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {}}>
+          <Ionicons name="share-social" size={24} color="#333" />
+        </TouchableOpacity>
       </View>
+
       <Text style={styles.title}>Choose Community</Text>
-      <TextInput style={styles.input} placeholder="Search..." />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {schools.map((school, index) => (
-          <Link key={index} href="/" asChild>
-            <Pressable style={styles.card}>
-              <Text style={styles.cardTitle}>{school}</Text>
-            </Pressable>
-          </Link>
-        ))}
+
+      <View style={styles.searchContainer}>
+        <Ionicons
+          name="search"
+          size={20}
+          color="#aaa"
+          style={{ marginRight: 8 }}
+        />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search..."
+          placeholderTextColor="#aaa"
+          value={searchValue}
+          onChangeText={(text) => setSearchValue(text)}
+        />
+      </View>
+
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        {filteredCommunities.length > 0 ? (
+          filteredCommunities.map((community) => (
+            <TouchableOpacity
+              onPress={() => {
+                router.push({
+                  pathname: "/school_list",
+                  params: {
+                    communityName: community.name,
+                    communityId: community.id,
+                    country: country,
+                  },
+                });
+              }}
+              key={community.id}
+              style={styles.communityBox}
+            >
+              <Text style={styles.communityName}>{community.name}</Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.noResults}>No communities found</Text>
+        )}
       </ScrollView>
+
+      <View style={styles.progressBar}>
+        <View style={styles.progressFill} />
+      </View>
     </View>
   );
 }
@@ -53,66 +111,61 @@ export default function CommunityList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
-    paddingTop: 60,
-    paddingHorizontal: 20,
+    backgroundColor: "#f2f2f2",
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
-  header: {
+  topBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "100%",
-    marginBottom: 24,
-  },
-  iconContainer: {
-    backgroundColor: "#e8eaf6",
-    padding: 12,
-    borderRadius: 12,
-    width: 48,
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
+    marginBottom: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "bold",
-    marginTop: 24,
-    marginBottom: 32,
-    textAlign: "center",
-  },
-  input: {
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginBottom: 25,
-    width: "100%",
-  },
-  scrollContent: {
-    width: "100%",
-  },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 16,
-    width: "100%",
+    alignSelf: "center",
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    alignItems: "center",
-    justifyContent: "center",
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "darkblue",
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+  },
+  communityBox: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 8,
+    flex: 1,
+    marginBottom: 12,
+    alignItems: "center",
+  },
+  communityName: {
+    fontSize: 16,
+  },
+  noResults: {
+    fontSize: 16,
+    color: "#999",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: "#ccc",
+    borderRadius: 2,
+    marginVertical: 16,
+    overflow: "hidden",
+  },
+  progressFill: {
+    width: "10%",
+    height: "100%",
+    backgroundColor: "#4169e1",
   },
 });
