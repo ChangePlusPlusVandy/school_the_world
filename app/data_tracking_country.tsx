@@ -15,7 +15,7 @@ export default function DataTrackingCountry() {
       <View style={styles.buttonContainer}>
         <Link
           href={{
-            pathname: "/community_list",
+            pathname: "/data_tracking_community",
             params: { country: "Guatemala" },
           }}
           style={styles.buttonLabels}
@@ -26,7 +26,7 @@ export default function DataTrackingCountry() {
       <View style={styles.buttonContainer}>
         <Link
           href={{
-            pathname: "/community_list",
+            pathname: "/data_tracking_community",
             params: { country: "Honduras" },
           }}
           style={styles.buttonLabels}
@@ -37,7 +37,7 @@ export default function DataTrackingCountry() {
       <View style={styles.buttonContainer}>
         <Link
           href={{
-            pathname: "/community_list",
+            pathname: "/data_tracking_community",
             params: { country: "Panama" },
           }}
           style={styles.buttonLabels}
@@ -51,7 +51,7 @@ export default function DataTrackingCountry() {
 
 const styles = StyleSheet.create({
   topRow: {
-    width: 300,
+    width: 331,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -61,51 +61,33 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     backgroundColor: "#EFF2F7",
-    paddingTop: 60,
-    paddingHorizontal: 20,
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginTop: 24,
-    marginBottom: 32,
-    paddingBottom: "3%",
+    marginTop: 20,
+    fontSize: 25,
+    fontStyle: "normal",
+    fontWeight: 700,
+    letterSpacing: 0.75,
+    fontFamily: "Plus Jakarta Sans",
   },
 
   buttonContainer: {
-    // alignItems: 'center',
-    // justifyContent: 'center',
-    // backgroundColor: '#FFFFFF',
-    // marginTop: 20,
-    // marginBottom: 10,
-    // borderRadius: 20,
-    // width: 331,
-    // height: 102,
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
-    width: "85%",
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    marginTop: 20,
+    marginBottom: 10,
+    borderRadius: 20,
+    width: 331,
+    height: 102,
   },
 
   buttonLabels: {
-    // textAlign: 'center',
-    // fontFamily: 'Plus Jakarta Sans',
-    // fontSize: 20,
-    // fontStyle: 'normal',
-    // fontWeight: 700,
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 4,
+    textAlign: "center",
+    fontFamily: "Plus Jakarta Sans",
+    fontSize: 20,
+    fontStyle: "normal",
+    fontWeight: 700,
   },
 });
