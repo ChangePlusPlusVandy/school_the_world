@@ -148,4 +148,37 @@ describe("DatabaseService", () => {
       expect(result).toBeNull();
     });
   });
+  describe("getAllCountries", () => {
+    it("should get all countries successfully", async () => {
+      const mockCountries: Country[] = [
+        { id: 1, name: "Country 1" },
+        { id: 2, name: "Country 2" },
+      ];
+
+      mockDb.getAllAsync.mockResolvedValue(mockCountries);
+
+      const result = await getAllCountries(mockDb);
+
+      expect(mockDb.getAllAsync).toHaveBeenCalledWith(
+        `SELECT * FROM countries ORDER BY name ASC`
+      );
+      expect(result).toEqual(mockCountries);
+    });
+
+    it("should return empty array when no countries exist", async () => {
+      mockDb.getAllAsync.mockResolvedValue([]);
+
+      const result = await getAllCountries(mockDb);
+
+      expect(result).toEqual([]);
+    });
+
+    it("should handle errors and return empty array", async () => {
+      mockDb.getAllAsync.mockRejectedValue(new Error("Database error"));
+
+      const result = await getAllCountries(mockDb);
+
+      expect(result).toEqual([]);
+    });
+  });
 });

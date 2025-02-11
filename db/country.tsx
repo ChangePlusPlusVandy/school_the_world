@@ -66,3 +66,18 @@ export const deleteCountry = async (
     return null;
   }
 };
+
+export async function getAllCountries(
+  db: SQLite.SQLiteDatabase
+): Promise<Country[]> {
+  try {
+    const countries = await db.getAllAsync<Country>(
+      `SELECT * FROM countries ORDER BY name ASC`
+    );
+    
+    return countries || [];
+  } catch (error) {
+    console.error("Failed to fetch countries:", error);
+    return [];
+  }
+}
