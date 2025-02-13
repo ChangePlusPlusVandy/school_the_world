@@ -44,6 +44,9 @@ export default function DataTrackingCountry() {
           <Link href="/" style={styles.buttonLabels}>
             {country}
           </Link>
+          <TouchableOpacity style={styles.deleteButton}/*onPress={() -> } */>
+              <MaterialIcons name="highlight-off" size={24} color="#BE3737" />
+            </TouchableOpacity>
         </View>
       ))}
 
@@ -136,7 +139,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    alignItems: "center",
+    
+    flexDirection: "row",
+    justifyContent: 'center',
+    // alignItems: "center",
   },
 
   buttonLabels: {
@@ -148,6 +154,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 4,
+    marginRight: 10,
   },
   addButton: {
     flexDirection: "row",
@@ -210,4 +217,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  deleteButton: {
+    marginLeft: 10,
+  }
 });
