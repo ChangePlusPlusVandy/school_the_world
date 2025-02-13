@@ -1,27 +1,65 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { createDatabase, DatabaseService } from "@/db/base";
 
 export default function DataTrackingCountry() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [countries, setCountries] = useState(["Guatemala", "Honduras", "Panama"])
-  const [modalVisible, setModalVisible] = useState(false)
-  const [newCountry, setNewCountry] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [countries, setCountries] = useState<string[]>([]);
+  const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newCountry, setNewCountry] = useState("");
+  const [db, setDb] = useState<DatabaseService | null>(null);
+
+  //initialize db and dynamically load countries from db
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const databaseService = await createDatabase();
+        setDb(databaseService);
+        console.log("Database initialized");
+        const fetchedCountries = await databaseService.getAllCountries();
+        if (fetchedCountries) {
+          setCountries(fetchedCountries.map((country) => country.name));
+          setFilteredCountries(fetchedCountries.map((country) => country.name));
+        }
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+    };
+
+    fetchCountries();
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    // Implement filtering logic here
-    console.log(query);
+    if (query === "") {
+      setFilteredCountries(countries);
+    } else {
+      const filtered = countries.filter((country) =>
+        country.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredCountries(filtered);
+    }
   };
 
   const handleAddCountry = () => {
     if (newCountry) {
-      setCountries([...countries, newCountry])
-      setNewCountry("")
-      setModalVisible(false)
+      setCountries([...countries, newCountry]);
+      setFilteredCountries([...countries, newCountry]);
+      setNewCountry("");
+      setModalVisible(false);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -32,14 +70,22 @@ export default function DataTrackingCountry() {
       </View>
 
       <Text style={styles.title}>Choose Country</Text>
-      <TextInput style={styles.input} placeholder="Search..." />
+      <TextInput
+        style={styles.input}
+        placeholder="Search..."
+        value={searchQuery}
+        onChangeText={handleSearch}
+      />
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-          <MaterialIcons name="add" size={24} color="white" />
-          <Text style={styles.addButtonText}>Add a Country</Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <MaterialIcons name="add" size={24} color="white" />
+        <Text style={styles.addButtonText}>Add a Country</Text>
+      </TouchableOpacity>
 
-      {countries.map((country, index) => (
+      {filteredCountries.map((country, index) => (
         <View key={index} style={styles.buttonContainer}>
           <Link href="/" style={styles.buttonLabels}>
             {country}
@@ -48,34 +94,35 @@ export default function DataTrackingCountry() {
       ))}
 
       <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Add a Country</Text>
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add a Country</Text>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Country Name</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Enter country name"
-                  value={newCountry}
-                  onChangeText={setNewCountry}
-                />
-              </View>
-
-              <TouchableOpacity style={styles.continueButton} onPress={handleAddCountry}>
-                <Text style={styles.continueButtonText}>Add and Continue</Text>
-              </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Country Name</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter country name"
+                value={newCountry}
+                onChangeText={setNewCountry}
+              />
             </View>
-          </View>
-        </Modal>
-    </View>
 
-    
+            <TouchableOpacity
+              style={styles.continueButton}
+              onPress={handleAddCountry}
+            >
+              <Text style={styles.continueButtonText}>Add and Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 

@@ -4,6 +4,7 @@ import {
   getCountryById,
   editCountry,
   deleteCountry,
+  getAllCountries,
 } from "./country";
 import {
   insertCommunity,
@@ -12,12 +13,7 @@ import {
   getCommunityById,
   getAllCommunitiesByCountry,
 } from "./community";
-import {
-  insertEntry,
-  editEntry,
-  deleteEntryById,
-  getEntryById
-} from "./entry";
+import { insertEntry, editEntry, deleteEntryById, getEntryById } from "./entry";
 
 import { Country } from "./country";
 import { Community } from "./community";
@@ -115,6 +111,16 @@ export class DatabaseService {
     }
   }
 
+  async getAllCountries(): Promise<Country[] | null> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      return await getAllCountries(this.db);
+    } catch (error) {
+      console.error("error getting all countries:", error);
+      return null;
+    }
+  }
+
   async createEntry(entry: Omit<Entry, "id">): Promise<Entry | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
@@ -198,9 +204,11 @@ export class DatabaseService {
     }
   }
 
-
-
-  async editEntry(schoolId: string, entryId: string, newEntry: Entry): Promise<Entry | null> {
+  async editEntry(
+    schoolId: string,
+    entryId: string,
+    newEntry: Entry
+  ): Promise<Entry | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
       return await editEntry(this.db, entryId, newEntry);
