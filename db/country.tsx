@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import { Entry } from "./entry";
 
 export interface Country {
   id: number;
@@ -54,15 +55,23 @@ export const deleteCountry = async (
       `SELECT 1 FROM countries WHERE id = ? LIMIT 1`,
       [id]
     );
+    
     if (!country) {
       return null;
     }
 
-    await db.runAsync(`DELETE FROM countries WHERE id = ?`, [id]);
+    await db.runAsync(`DELETE FROM countries WHERE id = ?`, [id]);      //delete the country from the country table
+    await db.runAsync(                //delete all entries relevant to the given country 
+      `DELETE FROM entries WHERE country = ?`,
+      [country.name]
+    )
+    await db.runAsync(
+      'DELETE FROM communities WHERE country = ?',
+      [country.name]                   //delete all communities relevant to the given country
+    )
     return country;
   } catch (error) {
     console.error("Failed to delete country");
-
     return null;
   }
 };

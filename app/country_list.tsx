@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Modal,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { createDatabase, DatabaseService } from "@/db/base";
+import { createDatabase, DatabaseService } from "../db/base";
 
 export default function DataTrackingCountry() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,9 +11,25 @@ export default function DataTrackingCountry() {
   const [modalVisible, setModalVisible] = useState(false);
   const [newCountry, setNewCountry] = useState("");
   const [db, setDb] = useState<DatabaseService | null>(null);
-
-  //initialize db and dynamically load countries from db
+  
+  //initialize db and dynamically load countries from db 
   useEffect(() => {
+    const initializeDb = async () => {
+      const databaseService = await createDatabase();
+      setDb(databaseService);
+      console.log("Database initialized");
+      const allCountries = await databaseService.getAllCountries();
+      if (allCountries) {
+        setCountries(allCountries.map((country) => country.name));
+      } else {
+        console.log("No countries found");
+      }
+    };
+
+    initializeDb().catch((error) => {
+      console.error("Error initializing database: ", error);
+    });
+    
     const fetchCountries = async () => {
       try {
         const databaseService = await createDatabase();
@@ -51,12 +60,26 @@ export default function DataTrackingCountry() {
     }
   };
 
-  const handleAddCountry = () => {
+  const handleAddCountry = async () => {
+    if (!db) {
+      alert("Database not initialized. Please try again.");
+      return;
+    }
+
     if (newCountry) {
       setCountries([...countries, newCountry]);
       setFilteredCountries([...countries, newCountry]);
       setNewCountry("");
       setModalVisible(false);
+      try {
+        await db.addCountry(newCountry);
+        setModalVisible(false);
+        console.log("Country added successfully");
+      } catch (error) {
+        console.error("Error adding country: ", error);
+      }
+    } else {
+      alert("Please enter a country name.");
     }
   };
 
@@ -89,6 +112,9 @@ export default function DataTrackingCountry() {
           <Link href="/" style={styles.buttonLabels}>
             {country}
           </Link>
+          <TouchableOpacity style={styles.deleteButton}/*onPress={() -> } */>
+              <MaterialIcons name="highlight-off" size={24} color="#BE3737" />
+            </TouchableOpacity>
         </View>
       ))}
 
@@ -182,7 +208,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    alignItems: "center",
+    
+    flexDirection: "row",
+    justifyContent: 'center',
+    // alignItems: "center",
   },
 
   buttonLabels: {
@@ -194,6 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 4,
+    marginRight: 10,
   },
   addButton: {
     flexDirection: "row",
@@ -256,4 +286,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  deleteButton: {
+    marginLeft: 10,
+  }
 });

@@ -116,10 +116,11 @@ export class DatabaseService {
       if (!this.db) throw new Error("Database not initialized");
       return await getAllCountries(this.db);
     } catch (error) {
-      console.error("error getting all countries:", error);
+      console.error("Error getting all countries:", error);
       return null;
     }
   }
+  
 
   async createEntry(entry: Omit<Entry, "id">): Promise<Entry | null> {
     try {

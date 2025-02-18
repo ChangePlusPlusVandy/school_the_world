@@ -8,18 +8,27 @@ import {
   ScrollView,
   Modal,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { Link } from "expo-router";
 
 import { MaterialIcons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 
 export default function CommunityList() {
   const [schools, setSchools] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [schoolName, setSchoolName] = useState("");
   const [status, setStatus] = useState("");
+  const [editMode, setEditMode] = useState(false);
   const [statusDropdownVisible, setStatusDropdownVisible] = useState(false);
-  const statuses = ["Not Started", "Identified", "Agreement Signed", "In Progress", "Dedicated"];
+  const statuses = [
+    "Not Started",
+    "Identified",
+    "Agreement Signed",
+    "In Progress",
+    "Dedicated",
+  ];
 
   useEffect(() => {
     // Fetch schools based on the selected community
@@ -41,6 +50,14 @@ export default function CommunityList() {
     }
   };
 
+  const handleEdit = () => {
+    setEditMode(!editMode);
+  };
+
+  const handleDelete = (school: string) => {
+    setSchools((prev) => prev.filter((s) => s !== school));
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -58,19 +75,46 @@ export default function CommunityList() {
       </View>
       <Text style={styles.title}>Choose Community</Text>
       <TextInput style={styles.input} placeholder="Search..." />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Pressable style={[styles.card, styles.addCard]} onPress={addSchool}>
-          <View style={styles.addCardContent}>
-            <Text style={[styles.cardTitle, styles.addTitle]}>Add a School</Text>
+      <View style={styles.addCardContainer}>
+        <View style={[styles.card, styles.addCard]}>
+          <Pressable style={styles.addCardContent} onPress={addSchool}>
+            <Text style={[styles.cardTitle, styles.addTitle]}>
+              Add a School
+            </Text>
             <Text style={[styles.cardTitle, styles.addTitle]}> +</Text>
-          </View>
-        </Pressable>
+          </Pressable>
+        </View>
+        <TouchableOpacity onPress={handleEdit} style={styles.editCard}>
+          <Feather name="edit" size={24} color="green" />
+        </TouchableOpacity>
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {schools.map((school, index) => (
-          <Link key={index} href="/" asChild>
-            <Pressable style={styles.card}>
-              <Text style={styles.cardTitle}>{school}</Text>
-            </Pressable>
-          </Link>
+          <View key={index} style={[styles.card, styles.schoolCard]}>
+            <View style={styles.schoolRow}>
+              <Link href="/" asChild>
+                <Pressable>
+                  <Text style={styles.cardTitle}>{school}</Text>
+                </Pressable>
+              </Link>
+              {editMode && (
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    onPress={() => Alert.alert("Edit", "Edit school")}
+                    style={styles.iconButton}
+                  >
+                    <Feather name="edit" size={24} color="green" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(school)}
+                    style={styles.iconButton}
+                  >
+                    <MaterialIcons name="delete" size={24} color="red" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
         ))}
       </ScrollView>
 
@@ -91,29 +135,31 @@ export default function CommunityList() {
               onChangeText={setSchoolName}
             />
             <TouchableOpacity
-  style={styles.dropdown}
-  onPress={() => setStatusDropdownVisible(!statusDropdownVisible)}
->
-  <Text style={styles.dropdownText}>{status || "Select Status"}</Text>
-</TouchableOpacity>
-{statusDropdownVisible && (
-  <View style={styles.dropdownContainer}>
-    <View style={styles.dropdownList}>
-      {statuses.map((item, index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.dropdownItem}
-          onPress={() => {
-            setStatus(item);
-            setStatusDropdownVisible(false);
-          }}
-        >
-          <Text style={styles.dropdownItemText}>{item}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  </View>
-)}
+              style={styles.dropdown}
+              onPress={() => setStatusDropdownVisible(!statusDropdownVisible)}
+            >
+              <Text style={styles.dropdownText}>
+                {status || "Select Status"}
+              </Text>
+            </TouchableOpacity>
+            {statusDropdownVisible && (
+              <View style={styles.dropdownContainer}>
+                <View style={styles.dropdownList}>
+                  {statuses.map((item, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setStatus(item);
+                        setStatusDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{item}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
 
             <View style={styles.modalActions}>
               <Pressable
@@ -183,34 +229,73 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 8,
     padding: 16,
-    width: "100%",
     marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     alignItems: "center",
     justifyContent: "center",
   },
+  addCardContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingVertical: 5,
+  },
   addCard: {
     backgroundColor: "green",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    width: "85%",
+    borderRadius: 8,
+  },
+  editCard: {
+    backgroundColor: "white",
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    elevation: 3,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginBottom: 16,
   },
   addCardContent: {
     flexDirection: "row",
     alignItems: "center",
   },
+  schoolCard: {
+    width: "100%",
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "darkblue",
+    color: "black",
   },
   addTitle: {
     color: "white",
-    paddingLeft: 40,
+    paddingLeft: 10,
+  },
+  schoolRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    height: 45,
+    width: "100%",
+  },
+  actionButtons: {
+    flexDirection: "row",
+  },
+  iconButton: {
+    padding: 10,
   },
   modalOverlay: {
     flex: 1,
@@ -246,7 +331,7 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     position: "absolute",
-    top: 200, 
+    top: 200,
     left: 20,
     width: "100%",
     zIndex: 1,
@@ -262,7 +347,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  
+
   dropdownItem: {
     padding: 10,
     borderBottomWidth: 1,
