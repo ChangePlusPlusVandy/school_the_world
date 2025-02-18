@@ -109,7 +109,7 @@ export default function DataTrackingCountry() {
 
       {filteredCountries.map((country, index) => (
         <View key={index} style={styles.buttonContainer}>
-          <Link href="/" style={styles.buttonLabels}>
+          <Link href={`/community_list?country=${country}`} style={styles.buttonLabels}>
             {country}
           </Link>
           <TouchableOpacity style={styles.deleteButton}/*onPress={() -> } */>

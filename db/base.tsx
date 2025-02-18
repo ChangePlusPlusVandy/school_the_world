@@ -34,6 +34,14 @@ export class DatabaseService {
       `);
 
       await this.db.execAsync(`
+        CREATE TABLE IF NOT EXISTS communities(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          country INTEGER NOT NULL
+        )
+      `)
+
+      await this.db.execAsync(`
         CREATE TABLE IF NOT EXISTS entries(
           id TEXT PRIMARY KEY,
           arrival_date TEXT NOT NULL,
@@ -54,8 +62,8 @@ export class DatabaseService {
           program_type TEXT NOT NULL,
           num_children TEXT NOT NULL,
           num_parents TEXT NOT NULL,
-          country TEXT NOT NULL,
-          community TEXT NOT NULL,
+          country INTEGER NOT NULL,
+          community INTEGER NOT NULL,
           program TEXT NOT NULL
         )
       `);
