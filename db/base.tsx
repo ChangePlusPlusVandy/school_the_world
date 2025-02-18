@@ -13,12 +13,7 @@ import {
   getCommunityById,
   getAllCommunitiesByCountry,
 } from "./community";
-import {
-  insertEntry,
-  editEntry,
-  deleteEntryById,
-  getEntryById
-} from "./entry";
+import { insertEntry, editEntry, deleteEntryById, getEntryById } from "./entry";
 
 import { Country } from "./country";
 import { Community } from "./community";
@@ -210,9 +205,11 @@ export class DatabaseService {
     }
   }
 
-
-
-  async editEntry(schoolId: string, entryId: string, newEntry: Entry): Promise<Entry | null> {
+  async editEntry(
+    schoolId: string,
+    entryId: string,
+    newEntry: Entry
+  ): Promise<Entry | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
       return await editEntry(this.db, entryId, newEntry);
