@@ -1,13 +1,35 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { createDatabase, DatabaseService } from "../db/base";
 
 export default function DataTrackingCountry() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [countries, setCountries] = useState(["Guatemala", "Honduras", "Panama"])
-  const [modalVisible, setModalVisible] = useState(false)
-  const [newCountry, setNewCountry] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [countries, setCountries] = useState([] as string[]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newCountry, setNewCountry] = useState("");
+  const [db, setDb] = useState<DatabaseService | null>(null);
+  
+  //initialize db and dynamically load countries from db 
+  useEffect(() => {
+    const initializeDb = async () => {
+      const databaseService = await createDatabase();
+      setDb(databaseService);
+      console.log("Database initialized");
+      const allCountries = await databaseService.getAllCountries();
+      if (allCountries) {
+        setCountries(allCountries.map((country) => country.name));
+      } else {
+        console.log("No countries found");
+      }
+    };
+
+    initializeDb().catch((error) => {
+      console.error("Error initializing database: ", error);
+    });
+
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -15,13 +37,24 @@ export default function DataTrackingCountry() {
     console.log(query);
   };
 
-  const handleAddCountry = () => {
-    if (newCountry) {
-      setCountries([...countries, newCountry])
-      setNewCountry("")
-      setModalVisible(false)
+  const handleAddCountry = async () => {
+    if (!db) {
+      alert("Database not initialized. Please try again.");
+      return;
     }
-  }
+
+    if (newCountry) {
+      try {
+        await db.addCountry(newCountry);
+        setModalVisible(false);
+        console.log("Country added successfully");
+      } catch (error) {
+        console.error("Error adding country: ", error);
+      }
+    } else {
+      alert("Please enter a country name.");
+    }
+  };
 
   return (
     <View style={styles.container}>

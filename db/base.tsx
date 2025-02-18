@@ -4,6 +4,7 @@ import {
   getCountryById,
   editCountry,
   deleteCountry,
+  getAllCountries,
 } from "./country";
 import {
   insertCommunity,
@@ -114,6 +115,17 @@ export class DatabaseService {
       return null;
     }
   }
+
+  async getAllCountries(): Promise<Country[] | null> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      return await getAllCountries(this.db);
+    } catch (error) {
+      console.error("Error getting all countries:", error);
+      return null;
+    }
+  }
+  
 
   async createEntry(entry: Omit<Entry, "id">): Promise<Entry | null> {
     try {
