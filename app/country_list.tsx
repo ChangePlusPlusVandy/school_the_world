@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { createDatabase, DatabaseService } from "../db/base";
+import { createDatabase, DatabaseService} from "../db/base";
 
 export default function DataTrackingCountry() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,6 +83,31 @@ export default function DataTrackingCountry() {
     }
   };
 
+  const handleDeleteCountry = async (country: string) => {                 //implemented deleteCountry in frontend 
+    if (!db) {
+      alert("Database not initialized. Please try again.");
+      return;
+    }
+
+    //backend deletion
+    const allCountries = await db.getAllCountries();      //get all countries items from the database
+    const targetCountry = allCountries?.find((c) => c.name == country)    //loop for the desired country
+
+    if (!targetCountry || targetCountry.id === undefined) {
+      alert("Country not found in database.");
+      return;
+    }                    
+    
+    //call backend endpoint to process the deletion
+    db.deleteCountry(targetCountry?.id);
+
+
+    //frontend deletion
+    const newCountryArr = countries.filter((c) => c!=country);  
+    setFilteredCountries(newCountryArr); 
+    setCountries(newCountryArr);    //update the Countries state
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
@@ -112,9 +137,9 @@ export default function DataTrackingCountry() {
           <Link href={`/community_list?country=${country}`} style={styles.buttonLabels}>
             {country}
           </Link>
-          <TouchableOpacity style={styles.deleteButton}/*onPress={() -> } */>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => {handleDeleteCountry(country)}}>
               <MaterialIcons name="highlight-off" size={24} color="#BE3737" />
-            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       ))}
 
