@@ -55,9 +55,10 @@ export const deleteCommunityById = async (
       return null;
     }
     await db.runAsync(`DELETE FROM communities WHERE id = ?`, [id]);
+    await db.runAsync(`DELETE FROM entries WHERE community = ?`, [community.name])
     return community;
   } catch (error) {
-    console.error("Fail to delete community by id.");
+    console.error("Failed to delete community by id.");
     return null;
   }
 };
