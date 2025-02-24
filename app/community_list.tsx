@@ -10,10 +10,10 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { Link } from "expo-router";
-
+import { Link, useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import { createDatabase, DatabaseService } from "../db/base";
 
 export default function CommunityList() {
   const [schools, setSchools] = useState<string[]>([]);
@@ -22,6 +22,9 @@ export default function CommunityList() {
   const [status, setStatus] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [statusDropdownVisible, setStatusDropdownVisible] = useState(false);
+  const [db, setDb] = useState<DatabaseService | null>(null);
+  const { country } = useLocalSearchParams();
+
   const statuses = [
     "Not Started",
     "Identified",
@@ -31,9 +34,35 @@ export default function CommunityList() {
   ];
 
   useEffect(() => {
-    // Fetch schools based on the selected community
-    setSchools(Array.from({ length: 12 }, (_, index) => `School ${index + 1}`));
+    const initializeDb = async () => {
+      const databaseService = await createDatabase();
+      setDb(databaseService);
+      console.log("Database initialized");
+    };
+
+    initializeDb().catch((error) => {
+      console.error("Error initializing database: ", error);
+    });
   }, []);
+
+  useEffect(() => {
+    if (db && country) {
+      const fetchCommunities = async () => {
+        try {
+          const communities = await db.getCommunitiesByCountry(
+            country as string
+          );
+          if (communities) {
+            setSchools(communities.map((community) => community.name));
+          }
+        } catch (error) {
+          console.error("Error fetching communities:", error);
+        }
+      };
+
+      fetchCommunities();
+    }
+  }, [db, country]);
 
   const addSchool = () => {
     setModalVisible(true);
@@ -222,9 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     width: "100%",
   },
-  scrollContent: {
-    width: "100%",
-  },
+  scrollContent: { width: "100%" },
   card: {
     backgroundColor: "white",
     borderRadius: 8,
@@ -268,22 +295,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     marginBottom: 16,
   },
-  addCardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  schoolCard: {
-    width: "100%",
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "black",
-  },
-  addTitle: {
-    color: "white",
-    paddingLeft: 10,
-  },
+  addCardContent: { flexDirection: "row", alignItems: "center" },
+  schoolCard: { width: "100%" },
+  cardTitle: { fontSize: 18, fontWeight: "600", color: "black" },
+  addTitle: { color: "white", paddingLeft: 10 },
   schoolRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -291,12 +306,8 @@ const styles = StyleSheet.create({
     height: 45,
     width: "100%",
   },
-  actionButtons: {
-    flexDirection: "row",
-  },
-  iconButton: {
-    padding: 10,
-  },
+  actionButtons: { flexDirection: "row" },
+  iconButton: { padding: 10 },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -325,10 +336,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 20,
   },
-  dropdownText: {
-    fontSize: 16,
-    color: "#6b7280",
-  },
+  dropdownText: { fontSize: 16, color: "#6b7280" },
   dropdownContainer: {
     position: "absolute",
     top: 200,
@@ -353,10 +361,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
   },
-  dropdownItemText: {
-    fontSize: 16,
-    color: "#374151",
-  },
+  dropdownItemText: { fontSize: 16, color: "#374151" },
   modalActions: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -370,14 +375,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
-  cancelButton: {
-    backgroundColor: "grey",
-  },
-  saveButton: {
-    backgroundColor: "green",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
+  cancelButton: { backgroundColor: "grey" },
+  saveButton: { backgroundColor: "green" },
+  buttonText: { color: "white", fontWeight: "bold" },
 });
