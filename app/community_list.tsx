@@ -17,11 +17,13 @@ import { createDatabase, DatabaseService } from "../db/base";
 
 export default function CommunityList() {
   const [schools, setSchools] = useState<string[]>([]);
+  const [filteredSchools, setFilteredSchools] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [schoolName, setSchoolName] = useState("");
   const [status, setStatus] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [statusDropdownVisible, setStatusDropdownVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [db, setDb] = useState<DatabaseService | null>(null);
   const { country } = useLocalSearchParams();
 
@@ -33,6 +35,7 @@ export default function CommunityList() {
     "Dedicated",
   ];
 
+  // Initialize database
   useEffect(() => {
     const initializeDb = async () => {
       const databaseService = await createDatabase();
@@ -45,6 +48,7 @@ export default function CommunityList() {
     });
   }, []);
 
+  // Fetch communities based on the selected country
   useEffect(() => {
     if (db && country) {
       const fetchCommunities = async () => {
@@ -54,15 +58,27 @@ export default function CommunityList() {
           );
           if (communities) {
             setSchools(communities.map((community) => community.name));
+            setFilteredSchools(communities.map((community) => community.name));
           }
         } catch (error) {
           console.error("Error fetching communities:", error);
         }
       };
-
       fetchCommunities();
     }
   }, [db, country]);
+
+  // Handle search functionality
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredSchools(schools); // Reset to full list if search query is empty
+    } else {
+      const filtered = schools.filter((school) =>
+        school.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredSchools(filtered);
+    }
+  }, [searchQuery, schools]);
 
   const addSchool = () => {
     setModalVisible(true);
