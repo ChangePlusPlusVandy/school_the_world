@@ -1,22 +1,42 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView, Pressable, Alert } from "react-native";
-import { Link } from "expo-router";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  TextInput,
+  ScrollView,
+  Modal,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { Link, useLocalSearchParams } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
-import { Community } from "../db/community";
+
 
 export default function CommunityList() {
+  const [schools, setSchools] = useState<string[]>([]);
+  const [filteredSchools, setFilteredSchools] = useState<string[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{ visible: boolean; school: string | null }>({ visible: false, school: null });
   const [schoolName, setSchoolName] = useState("");
   const [status, setStatus] = useState("");
-  const [statusDropdownVisible, setStatusDropdownVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [deleteModal, setDeleteModal] = useState<{ visible: boolean; school: Community | null }>({ visible: false, school: null });
-  const [schools, setSchools] = useState<string[]>([]);
   const [editMode, setEditMode] = useState(false);
+  const [statusDropdownVisible, setStatusDropdownVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [db, setDb] = useState<DatabaseService | null>(null);
+  const { country } = useLocalSearchParams();
 
-  const statuses = ["Active", "Inactive", "Pending", "Dedicated"];
+  const statuses = [
+    "Not Started",
+    "Identified",
+    "Agreement Signed",
+    "In Progress",
+    "Dedicated",
+  ];
 
+  // Initialize database
   useEffect(() => {
     const initializeDb = async () => {
       const databaseService = await createDatabase();
@@ -27,10 +47,39 @@ export default function CommunityList() {
     initializeDb().catch((error) => {
       console.error("Error initializing database: ", error);
     });
-
-    // Fetch schools based on the selected community
-    setSchools(Array.from({ length: 12 }, (_, index) => `School ${index + 1}`));
   }, []);
+
+  // Fetch communities based on the selected country
+  useEffect(() => {
+    if (db && country) {
+      const fetchCommunities = async () => {
+        try {
+          const communities = await db.getCommunitiesByCountry(
+            country as string
+          );
+          if (communities) {
+            setSchools(communities.map((community) => community.name));
+            setFilteredSchools(communities.map((community) => community.name));
+          }
+        } catch (error) {
+          console.error("Error fetching communities:", error);
+        }
+      };
+      fetchCommunities();
+    }
+  }, [db, country]);
+
+  // Handle search functionality
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredSchools(schools); // Reset to full list if search query is empty
+    } else {
+      const filtered = schools.filter((school) =>
+        school.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredSchools(filtered);
+    }
+  }, [searchQuery, schools]);
 
   const addSchool = () => {
     setModalVisible(true);
@@ -47,10 +96,9 @@ export default function CommunityList() {
     }
   };
 
-  //this is assuming that the school array contains Community objects
-  const handleDelete = async (school: Community) => {
+  const handleDelete = async (school: string) => {
     if (db) {
-      const community = await db.deleteCommunityById(school.id);
+      const community = await db.deleteCommunity(school, country as string);
       if (community) {
         console.log(`Deleted community: ${community.name}`);
       } else {
@@ -61,7 +109,7 @@ export default function CommunityList() {
     }
   };
 
-  const confirmDelete = (school: Community) => {
+  const confirmDelete = (school: string) => {
     setDeleteModal({ visible: true, school });
   };
 
@@ -72,7 +120,12 @@ export default function CommunityList() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Choose Community</Text>
-      <TextInput style={styles.input} placeholder="Search..." />
+      <TextInput
+        style={styles.input}
+        placeholder="Search..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
       <View style={styles.addCardContainer}>
         <View style={[styles.card, styles.addCard]}>
           <Pressable style={styles.addCardContent} onPress={addSchool}>
@@ -87,7 +140,6 @@ export default function CommunityList() {
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* change the schools array to be an array of Community objects, the confirmDelete shoud stop erroring out */}
         {schools.map((school, index) => (
           <View key={index} style={[styles.card, styles.schoolCard]}>
             <View style={styles.schoolRow}>
@@ -185,7 +237,7 @@ export default function CommunityList() {
         <View style={styles.modalOverlay}>
           <View style={styles.deleteModalContent}>
             <Text style={styles.deleteModalTitle}>Are you sure you want to delete:</Text>
-            <Text style={styles.schoolNameText}>{deleteModal.school?.name ?? ""}</Text>
+            <Text style={styles.schoolNameText}>{deleteModal.school ?? ""}</Text>
             <View style={styles.deleteModalActions}>
               <Pressable
                 style={styles.deleteButton}
@@ -225,8 +277,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
-    padding: 10,
-    marginBottom: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginBottom: 25,
+    width: "100%",
+  },
+  scrollContent: { width: "100%" },
+  card: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    alignItems: "center",
+    justifyContent: "center",
   },
   addCardContainer: {
     flexDirection: "row",
@@ -234,12 +302,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  card: {
-    flex: 1,
-    padding: 20,
+  addCard: {
+    backgroundColor: "green",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    width: "85%",
     borderRadius: 8,
-    backgroundColor: "#f9f9f9",
-    marginBottom: 20,
+  },
+  addCardContent: { flexDirection: "row", alignItems: "center" },
+  schoolCard: { width: "100%" },
+  cardTitle: { fontSize: 18, fontWeight: "600", color: "black" },
+  addTitle: { color: "white", paddingLeft: 10 },
+  editCard: {
+    backgroundColor: "white",
+    width: 50,
+    height: 50,
+    borderRadius: 8,
     elevation: 3,
     alignItems: "center",
     justifyContent: "center",
@@ -247,42 +327,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  },
-  addCard: {
-    backgroundColor: "green",
-  },
-  addCardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "black",
-  },
-  addTitle: {
-    color: "white",
-  },
-  editCard: {
-    padding: 10,
-  },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  schoolCard: {
-    width: "100%",
+    marginBottom: 16,
   },
   schoolRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  actionButtons: {
-    flexDirection: "row",
-  },
-  iconButton: {
-    marginLeft: 10,
-  },
+  actionButtons: { flexDirection: "row" },
+  iconButton: { marginLeft: 10 },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -345,12 +398,10 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
   },
-  dropdownText: {
-    fontSize: 16,
-  },
+  dropdownText: { fontSize: 16, color: "#6b7280" },
   dropdownContainer: {
     position: "absolute",
-    top: 200,
+    top: 170,
     left: 20,
     width: "100%",
     zIndex: 1,
@@ -371,10 +422,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
   },
-  dropdownItemText: {
-    fontSize: 16,
-    color: "#374151",
-  },
+  dropdownItemText: { fontSize: 16, color: "#374151" },
   modalActions: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -388,11 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
-  saveButton: {
-    backgroundColor: "green",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
+  cancelButton: { backgroundColor: "grey" },
+  saveButton: { backgroundColor: "green" },
+  buttonText: { color: "white", fontWeight: "bold" },
 });

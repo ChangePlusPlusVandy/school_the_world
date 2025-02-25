@@ -42,26 +42,28 @@ export async function editCommunity(
   return null;
 }
 
-export const deleteCommunityById = async (
+export const deleteCommunityByNameAndCountry = async (
   db: SQLite.SQLiteDatabase,
-  id: number
+  name: string,
+  country: string
 ): Promise<Community | null> => {
   try {
     const community = await db.getFirstAsync<Community>(
-      `SELECT 1 FROM communities WHERE id = ? LIMIT 1`,
-      [id]
+      `SELECT * FROM communities WHERE name = ? AND country = ? LIMIT 1`,
+      [name, country]
     );
     if (!community) {
       return null;
     }
-    await db.runAsync(`DELETE FROM communities WHERE id = ?`, [id]);
-    await db.runAsync(`DELETE FROM entries WHERE community = ?`, [community.name])
+    await db.runAsync(`DELETE FROM communities WHERE name = ? AND country = ?`, [name, country]);
+    await db.runAsync(`DELETE FROM entries WHERE community = ?`, [community.name]);
     return community;
   } catch (error) {
-    console.error("Failed to delete community by id.");
+    console.error("Failed to delete community by name and country.", error);
     return null;
   }
 };
+
 
 export async function getCommunityById(
   db: SQLite.SQLiteDatabase,
