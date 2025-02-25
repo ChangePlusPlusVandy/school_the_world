@@ -9,7 +9,7 @@ import {
 import {
   insertCommunity,
   editCommunity,
-  deleteCommunityById,
+  deleteCommunityByNameAndCountry,
   getCommunityById,
   getAllCommunitiesByCountry,
 } from "./community";
@@ -183,10 +183,10 @@ export class DatabaseService {
     }
   }
 
-  async deleteCommunityById(id: number): Promise<Community | null> {
+  async deleteCommunity(name: string, country: string): Promise<Community | null> {
     try {
       if (!this.db) throw new Error("db not initialized");
-      return await deleteCommunityById(this.db, id);
+      return await deleteCommunityByNameAndCountry(this.db, name, country);
     } catch (err) {
       console.error("error getting country by id", err);
       return null;
