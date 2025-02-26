@@ -125,7 +125,7 @@ export default function CommunityList() {
     if (schoolName && status && db) {
       try {
         // Generate a unique ID (you might want to improve this logic)
-        const id = Date.now();
+        const id = String(Date.now());
         
         // Insert the community into the database
         const newCommunity = await db.addCommunity(

@@ -8,7 +8,7 @@ export interface Community {
 
 export async function insertCommunity(
   db: SQLite.SQLiteDatabase,
-  id: number,
+  id: string,
   communityName: string,
   countryName: string,
   getById: (id: number) => Promise<Community | null>

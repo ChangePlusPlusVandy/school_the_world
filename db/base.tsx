@@ -143,7 +143,7 @@ export class DatabaseService {
   async addCommunity(
     communityName: string,
     countryName: string,
-    id: number
+    id: string
   ): Promise<Community | null> {
     try {
       if (!this.db) throw new Error("Database not initialized");
