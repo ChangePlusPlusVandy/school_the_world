@@ -11,14 +11,15 @@ import {
   Alert,
 } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import Feather from "@expo/vector-icons/Feather";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
+
 
 export default function CommunityList() {
   const [schools, setSchools] = useState<string[]>([]);
   const [filteredSchools, setFilteredSchools] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{ visible: boolean; school: string | null }>({ visible: false, school: null });
   const [schoolName, setSchoolName] = useState("");
   const [status, setStatus] = useState("");
   const [editMode, setEditMode] = useState(false);
@@ -95,31 +96,36 @@ export default function CommunityList() {
     }
   };
 
+  const handleDelete = async (school: string) => {
+    if (db) {
+      const community = await db.deleteCommunity(school, country as string);
+      if (community) {
+        console.log(`Deleted community: ${community.name}`);
+      } else {
+        console.error("Failed to delete community");
+      }
+    } else {
+      console.error("Database not initialized");
+    }
+  };
+
+  const confirmDelete = (school: string) => {
+    setDeleteModal({ visible: true, school });
+  };
+
   const handleEdit = () => {
     setEditMode(!editMode);
   };
 
-  const handleDelete = (school: string) => {
-    setSchools((prev) => prev.filter((s) => s !== school));
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.iconContainer}>
-          <MaterialIcons name="arrow-back" size={24} color="darkblue" />
-        </Pressable>
-        <Link href="/" asChild>
-          <Pressable>
-            <MaterialIcons name="home" size={48} color="darkblue" />
-          </Pressable>
-        </Link>
-        <Pressable style={styles.iconContainer}>
-          <MaterialIcons name="file-upload" size={24} color="darkblue" />
-        </Pressable>
-      </View>
       <Text style={styles.title}>Choose Community</Text>
-      <TextInput style={styles.input} placeholder="Search..." />
+      <TextInput
+        style={styles.input}
+        placeholder="Search..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
       <View style={styles.addCardContainer}>
         <View style={[styles.card, styles.addCard]}>
           <Pressable style={styles.addCardContent} onPress={addSchool}>
@@ -151,7 +157,7 @@ export default function CommunityList() {
                     <Feather name="edit" size={24} color="green" />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => handleDelete(school)}
+                    onPress={() => confirmDelete(school)}
                     style={styles.iconButton}
                   >
                     <MaterialIcons name="delete" size={24} color="red" />
@@ -205,19 +211,49 @@ export default function CommunityList() {
                 </View>
               </View>
             )}
-
             <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.button, styles.cancelButton]}
+              <TouchableOpacity
+                style={styles.button}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
-              </Pressable>
-              <Pressable
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
                 onPress={handleSave}
               >
                 <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        transparent={true}
+        visible={deleteModal.visible}
+        onRequestClose={() => setDeleteModal({ visible: false, school: null })}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <Text style={styles.deleteModalTitle}>Are you sure you want to delete:</Text>
+            <Text style={styles.schoolNameText}>{deleteModal.school ?? ""}</Text>
+            <View style={styles.deleteModalActions}>
+              <Pressable
+                style={styles.deleteButton}
+                onPress={() => setDeleteModal({ visible: false, school: null })}
+              >
+              </Pressable>
+              <Pressable
+                style={[styles.deleteButton, styles.confirmDeleteButton]}
+                onPress={() => {
+                  if (deleteModal.school) {
+                    handleDelete(deleteModal.school);
+                    setDeleteModal({ visible: false, school: null });
+                  }
+                }}
+              >
+                <Text style={styles.confirmButtonText}>Yes, Delete</Text>
               </Pressable>
             </View>
           </View>
@@ -230,37 +266,16 @@ export default function CommunityList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
-    paddingTop: 60,
-    paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 24,
-  },
-  iconContainer: {
-    backgroundColor: "#e8eaf6",
-    padding: 12,
-    borderRadius: 12,
-    width: 48,
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    marginTop: 24,
-    marginBottom: 32,
-    textAlign: "center",
+    marginBottom: 20,
   },
   input: {
-    fontSize: 16,
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: "#ccc",
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 15,
@@ -283,10 +298,9 @@ const styles = StyleSheet.create({
   },
   addCardContainer: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    width: "100%",
-    paddingVertical: 5,
+    alignItems: "center",
+    marginBottom: 20,
   },
   addCard: {
     backgroundColor: "green",
@@ -297,6 +311,10 @@ const styles = StyleSheet.create({
     width: "85%",
     borderRadius: 8,
   },
+  addCardContent: { flexDirection: "row", alignItems: "center" },
+  schoolCard: { width: "100%" },
+  cardTitle: { fontSize: 18, fontWeight: "600", color: "black" },
+  addTitle: { color: "white", paddingLeft: 10 },
   editCard: {
     backgroundColor: "white",
     width: 50,
@@ -311,51 +329,79 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     marginBottom: 16,
   },
-  addCardContent: { flexDirection: "row", alignItems: "center" },
-  schoolCard: { width: "100%" },
-  cardTitle: { fontSize: 18, fontWeight: "600", color: "black" },
-  addTitle: { color: "white", paddingLeft: 10 },
   schoolRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    height: 45,
-    width: "100%",
   },
   actionButtons: { flexDirection: "row" },
-  iconButton: { padding: 10 },
+  iconButton: { marginLeft: 10 },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
+    width: "80%",
     backgroundColor: "white",
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 20,
-    width: "90%",
-    height: "40%",
     alignItems: "center",
+  },
+  deleteModalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 30,
+    alignItems: "center",
+  },
+  deleteModalTitle: {
+    fontSize: 20,
+    marginBottom: 20,
+    width: "70%",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  schoolNameText: {
+    fontSize: 18,
+    color: "green",
+    fontWeight: "bold",
+  },
+  deleteModalActions: {
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+  },
+  deleteButton: {
+    marginHorizontal: 10,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  confirmDeleteButton: {
+    backgroundColor: "green",
+  },
+  confirmButtonText: {
+    color: "white",
+    fontWeight: "bold",
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
     marginBottom: 20,
-    marginTop: 25,
   },
   dropdown: {
+    width: "100%",
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    width: "100%",
     marginBottom: 20,
   },
   dropdownText: { fontSize: 16, color: "#6b7280" },
   dropdownContainer: {
     position: "absolute",
-    top: 200,
+    top: 170,
     left: 20,
     width: "100%",
     zIndex: 1,
@@ -371,7 +417,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-
   dropdownItem: {
     padding: 10,
     borderBottomWidth: 1,
