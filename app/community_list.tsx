@@ -14,12 +14,25 @@ import { Link, useLocalSearchParams } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
 
+type Community = {
+  id: number;
+  name: string;
+  country: string;
+};
 
 export default function CommunityList() {
   const [schools, setSchools] = useState<string[]>([]);
   const [filteredSchools, setFilteredSchools] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [deleteModal, setDeleteModal] = useState<{ visible: boolean; school: string | null }>({ visible: false, school: null });
+  const [deleteModal, setDeleteModal] = useState<{
+    visible: boolean;
+    school: string | null;
+  }>({ visible: false, school: null });
+  const [editModal, setEditModal] = useState<{
+    visible: boolean;
+    school: string | null;
+    newName: string;
+  }>({ visible: false, school: null, newName: "" });
   const [schoolName, setSchoolName] = useState("");
   const [status, setStatus] = useState("");
   const [editMode, setEditMode] = useState(false);
@@ -162,8 +175,59 @@ export default function CommunityList() {
     setDeleteModal({ visible: true, school });
   };
 
-  const handleEdit = () => {
+  const confirmEdit = (school: string) => {
+    setEditModal({ visible: true, school, newName: school });
+  };
+
+  const handleEditButton = () => {
     setEditMode(!editMode);
+  };
+
+  const fetchCommunityId = async (schoolName: string) => {
+    if (!db) return null;
+    const communities = await db.getCommunitiesByCountry(country as string);
+    const community = communities?.find((c) => c.name === schoolName);
+    return community ? community.id : null;
+  };
+
+  const handleEditSave = async () => {
+    if (!db) {
+      console.error("Database not initialized");
+      return;
+    }
+
+    if (editModal.school && editModal.newName.trim()) {
+      const communityId = await fetchCommunityId(editModal.school);
+      if (!communityId) {
+        Alert.alert("Error", "Failed to find community ID.");
+        return;
+      }
+
+      try {
+        const updatedCommunity: Community = {
+          id: communityId,
+          name: editModal.newName,
+          country: country as string,
+        };
+
+        const success = await db.editCommunity(updatedCommunity, communityId);
+
+        if (success) {
+          setSchools((prev) =>
+            prev.map((s) => (s === editModal.school ? editModal.newName : s))
+          );
+          setEditModal({ visible: false, school: null, newName: "" });
+          console.log("Community updated successfully");
+        } else {
+          Alert.alert("Error", "Failed to update community in database.");
+        }
+      } catch (error) {
+        console.error("Error updating community:", error);
+        Alert.alert("Error", "An unexpected error occurred.");
+      }
+    } else {
+      Alert.alert("Error", "School name cannot be empty!");
+    }
   };
 
   return (
@@ -184,7 +248,7 @@ export default function CommunityList() {
             <Text style={[styles.cardTitle, styles.addTitle]}> +</Text>
           </Pressable>
         </View>
-        <TouchableOpacity onPress={handleEdit} style={styles.editCard}>
+        <TouchableOpacity onPress={handleEditButton} style={styles.editCard}>
           <Feather name="edit" size={24} color="green" />
         </TouchableOpacity>
       </View>
@@ -200,7 +264,7 @@ export default function CommunityList() {
               {editMode && (
                 <View style={styles.actionButtons}>
                   <TouchableOpacity
-                    onPress={() => Alert.alert("Edit", "Edit school")}
+                    onPress={() => confirmEdit(school)}
                     style={styles.iconButton}
                   >
                     <Feather name="edit" size={24} color="green" />
@@ -285,14 +349,17 @@ export default function CommunityList() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.deleteModalContent}>
-            <Text style={styles.deleteModalTitle}>Are you sure you want to delete:</Text>
-            <Text style={styles.schoolNameText}>{deleteModal.school ?? ""}</Text>
+            <Text style={styles.deleteModalTitle}>
+              Are you sure you want to delete:
+            </Text>
+            <Text style={styles.schoolNameText}>
+              {deleteModal.school ?? ""}
+            </Text>
             <View style={styles.deleteModalActions}>
               <Pressable
                 style={styles.deleteButton}
                 onPress={() => setDeleteModal({ visible: false, school: null })}
-              >
-              </Pressable>
+              ></Pressable>
               <Pressable
                 style={[styles.deleteButton, styles.confirmDeleteButton]}
                 onPress={() => {
@@ -303,6 +370,47 @@ export default function CommunityList() {
                 }}
               >
                 <Text style={styles.confirmButtonText}>Yes, Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        transparent={true}
+        visible={editModal.visible}
+        onRequestClose={() =>
+          setEditModal({ visible: false, school: null, newName: "" })
+        }
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <Text style={styles.deleteModalTitle}>Edit School Name</Text>
+            <TextInput
+              style={styles.input}
+              value={editModal.newName}
+              onChangeText={(text) =>
+                setEditModal((prev) => ({ ...prev, newName: text }))
+              }
+              placeholder="Enter new school name"
+            />
+            <View style={styles.deleteModalActions}>
+              <Pressable
+                style={[
+                  styles.deleteButton,
+                  { backgroundColor: "grey", marginBottom: 10 },
+                ]}
+                onPress={() =>
+                  setEditModal({ visible: false, school: null, newName: "" })
+                }
+              >
+                <Text style={styles.confirmButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.deleteButton, styles.confirmDeleteButton]}
+                onPress={handleEditSave}
+              >
+                <Text style={styles.confirmButtonText}>Save</Text>
               </Pressable>
             </View>
           </View>
