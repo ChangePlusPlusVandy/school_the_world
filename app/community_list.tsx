@@ -68,6 +68,29 @@ export default function CommunityList() {
       fetchCommunities();
     }
   }, [db, country]);
+    // Fetch communities based on the selected country
+    useEffect(() => {
+      if (db && country) {
+        fetchCommunitiesFromDb();
+      }
+    }, [db, country]);
+
+    // Fetch communities from the database
+    const fetchCommunitiesFromDb = async () => {
+      if (!db || !country) return;
+      
+      try {
+        const communities = await db.getCommunitiesByCountry(
+          country as string
+        );
+        if (communities) {
+          setSchools(communities.map((community) => community.name));
+          setFilteredSchools(communities.map((community) => community.name));
+        }
+      } catch (error) {
+        console.error("Error fetching communities:", error);
+      }
+    };
 
   // Handle search functionality
   useEffect(() => {
@@ -85,16 +108,42 @@ export default function CommunityList() {
     setModalVisible(true);
   };
 
-  const handleSave = () => {
-    if (schoolName && status) {
-      setSchools((prev) => [...prev, schoolName]);
-      setSchoolName("");
-      setStatus("");
-      setModalVisible(false);
+  const handleSave = async () => {
+    if (schoolName && status && db) {
+      try {
+        // Generate a unique ID (you might want to improve this logic)
+        const id = Date.now();
+        
+        // Insert the community into the database
+        const newCommunity = await db.addCommunity(
+          id,
+          schoolName,
+          country as string
+        );
+        
+        if (newCommunity) {
+          // Refresh the communities list from the database
+          await fetchCommunitiesFromDb();
+          
+          // Reset form
+          setSchoolName("");
+          setStatus("");
+          setModalVisible(false);
+          
+          // Show success message
+          Alert.alert("Success", `${schoolName} added successfully!`);
+        } else {
+          Alert.alert("Error", "Failed to add school to database.");
+        }
+      } catch (error) {
+        console.error("Error adding community:", error);
+        Alert.alert("Error", "An error occurred while adding the school.");
+      }
     } else {
       alert("Please fill out all fields.");
     }
   };
+
 
   const handleDelete = async (school: string) => {
     if (db) {
