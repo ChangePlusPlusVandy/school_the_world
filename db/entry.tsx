@@ -50,6 +50,29 @@ export async function getEntryById(
   }
 }
 
+export async function getEntries(
+  db: SQLite.SQLiteDatabase,
+  country: string,
+  community: string,
+  programType: string
+): Promise<Entry[] | null> {
+  try {
+    //get all desired entries 
+    const entries = await db.getAllAsync<Entry>(
+      `SELECT * FROM entries WHERE country = ? AND community = ? AND program_type = ?`,
+      [country, community, programType]
+    );
+    
+    if(entries.length==0) {
+      return null;
+    }
+    return entries;    //return the desired entries
+  } catch (error) {
+    console.error("Fail to get entries.");
+    return null;
+  }
+};
+
 export async function insertEntry(
   db: SQLite.SQLiteDatabase,
 
