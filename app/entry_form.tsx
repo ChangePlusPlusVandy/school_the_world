@@ -8,6 +8,10 @@ import {
   TextInput,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { useEffect } from "react";
+import { createDatabase, DatabaseService } from "../db/base";
+import { Entry } from "../db/entry";
+import { useRoute } from "@react-navigation/native";
 
 type Time = {
   hour: string;
@@ -49,6 +53,14 @@ export default function SchoolInfo() {
   const handleBack = () => console.log("Back button pressed");
   const handleHome = () => console.log("Home button pressed");
   const handleShare = () => console.log("Share button pressed");
+  const [db, setDb] = useState<DatabaseService | null>(null);
+  const route = useRoute();
+  //code for when the URL params are correctly set up
+  // const { country, community, program } = route.params as {
+  //   country: string;
+  //   community: string;
+  //   program: string;
+  // };
 
   const [state, setState] = useState({
     date: {
@@ -79,6 +91,18 @@ export default function SchoolInfo() {
     classroomUse: "",
     observations: "",
   });
+  // Initialize database
+    useEffect(() => {
+      const initializeDb = async () => {
+        const databaseService = await createDatabase();
+        setDb(databaseService);
+        console.log("Database initialized");
+      };
+  
+      initializeDb().catch((error) => {
+        console.error("Error initializing database: ", error);
+      });
+    }, []);
 
   const handleInputChange = (name: keyof State, value: any) => {
     setState((prevState) => ({
@@ -168,11 +192,44 @@ export default function SchoolInfo() {
     });
   };
 
-  {
-    /* change this to do something with the data */
-  }
-  const submitForm = () => {
-    console.log("Form submitted with data:", state);
+
+  const submitForm = async () => {
+
+    if (!db) {
+      console.error("Database not initialized");
+      return;
+    }
+
+    const entry: Omit<Entry, "id"> = {
+      arrival_date: `${state.date.year}-${state.date.month}-${state.date.day}`,
+      arrival_time: `${state.times.arrivalTime.hour}:${state.times.arrivalTime.minute} ${state.times.arrivalTime.period}`,
+      time_teachers_arrive: `${state.times.teacherArrivalTime.hour}:${state.times.teacherArrivalTime.minute} ${state.times.teacherArrivalTime.period}`,
+      time_children_leave: `${state.times.childrenArrivalTime.hour}:${state.times.childrenArrivalTime.minute} ${state.times.childrenArrivalTime.period}`,
+      time_classes_start: `${state.times.classStartTime.hour}:${state.times.classStartTime.minute} ${state.times.classStartTime.period}`,
+      time_classes_end: `${state.times.classEndTime.hour}:${state.times.classEndTime.minute} ${state.times.classEndTime.period}`,
+      recess_time: state.recessTime,
+      num_hours_children: state.schoolTime,
+      num_teachers_absent: state.absentTeachers,
+      cleanliness: state.cleanliness.toString(),
+      playground_used: state.playgroundUse === "Yes",
+      sinks_used: state.sinkUse === "Yes",
+      classroom_decor: state.decorationUse,
+      classrooms_used: state.classroomUse === "Yes",
+      observations: state.observations,
+      program_type: state.programType,
+      num_children: state.numChildren,
+      num_parents: state.numParents,
+      country: "Example Country", // change to country when URL params are set up
+      community: "Example Community", // change to community when URL params are set up
+      program: "Example Program", // change to program when URL params are set up
+    };
+
+    try {
+      const newEntry = await db.createEntry(entry);
+      console.log("Entry created successfully:", newEntry);
+    } catch (error) {
+      console.error("Error creating entry:", error);
+    }
   };
   return (
     <View style={styles.container}>
