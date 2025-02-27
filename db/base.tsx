@@ -13,7 +13,7 @@ import {
   getCommunityById,
   getAllCommunitiesByCountry,
 } from "./community";
-import { insertEntry, editEntry, deleteEntryById, getEntryById } from "./entry";
+import { insertEntry, editEntry, deleteEntryById, getEntryById, getEntries} from "./entry";
 
 import { Country } from "./country";
 import { Community } from "./community";
@@ -80,6 +80,17 @@ export class DatabaseService {
       return await getEntryById(this.db, id);
     } catch (err) {
       console.error("error getting entry by id:", err);
+      return null;
+    }
+  }
+
+  //get entries     endpoint
+  async getEntries(country: string, community: string, programType: string): Promise<Entry[] | null> {
+    try {
+      if (!this.db) throw new Error("db not initialized");
+      return await getEntries(this.db, country, community, programType);
+    } catch (err) {
+      console.error("error getting entries:", err);
       return null;
     }
   }
