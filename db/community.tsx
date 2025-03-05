@@ -14,16 +14,17 @@ export async function insertCommunity(
   getById: (id: number) => Promise<Community | null>
 ): Promise<Community | null> {
   const result = await db.runAsync(
-    `INSERT INTO communities (id, name, countryName) VALUES (?, ?, ?)`,
+    `INSERT INTO communities (id, name, country) VALUES (?, ?, ?)`,
     [id, communityName, countryName]
   );
 
-  if (result.lastInsertRowId) {
-    return getById(Number(result.lastInsertRowId));
+  if (result.changes > 0) {
+    return getById(Number(id));
   }
 
   return null;
 }
+
 
 export async function editCommunity(
   db: SQLite.SQLiteDatabase,

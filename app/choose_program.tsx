@@ -15,6 +15,9 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
 
 export default function DataTrackingCountry() {
+  const { country } = useLocalSearchParams();
+  const { community } = useLocalSearchParams();
+
   const [programs, setPrograms] = useState([
     "Early Childhood",
     "Primary School",
@@ -33,7 +36,7 @@ export default function DataTrackingCountry() {
 
       {programs.map((program, index) => (
         <View key={index} style={styles.buttonContainer}>
-          <Link href="/entry_form" style={styles.buttonLabels}>
+          <Link href={`/entry_form?country=${country}&community=${community}&program=${program}`} style={styles.buttonLabels}>
             {program}
           </Link>
         </View>

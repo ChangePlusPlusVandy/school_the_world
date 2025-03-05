@@ -126,14 +126,14 @@ export default function CommunityList() {
       try {
         // Generate a unique ID (you might want to improve this logic)
         const id = String(Date.now());
-        
+
         // Insert the community into the database
         const newCommunity = await db.addCommunity(
-          id,
           schoolName,
-          country as string
+          country as string,
+          id
         );
-        
+
         if (newCommunity) {
           // Refresh the communities list from the database
           await fetchCommunitiesFromDb();
@@ -163,6 +163,7 @@ export default function CommunityList() {
       const community = await db.deleteCommunity(school, country as string);
       if (community) {
         console.log(`Deleted community: ${community.name}`);
+        await fetchCommunitiesFromDb();
       } else {
         console.error("Failed to delete community");
       }
@@ -256,7 +257,7 @@ export default function CommunityList() {
         {schools.map((school, index) => (
           <View key={index} style={[styles.card, styles.schoolCard]}>
             <View style={styles.schoolRow}>
-              <Link href="/" asChild>
+              <Link href={`/choose_program?country=${country}&community=${school}`} asChild>
                 <Pressable>
                   <Text style={styles.cardTitle}>{school}</Text>
                 </Pressable>

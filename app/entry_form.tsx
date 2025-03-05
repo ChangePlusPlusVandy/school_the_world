@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { createDatabase, DatabaseService } from "../db/base";
 import { Entry } from "../db/entry";
 import { useRoute } from "@react-navigation/native";
+import { Link } from "expo-router";
 
 type Time = {
   hour: string;
@@ -55,12 +56,11 @@ export default function SchoolInfo() {
   const handleShare = () => console.log("Share button pressed");
   const [db, setDb] = useState<DatabaseService | null>(null);
   const route = useRoute();
-  //code for when the URL params are correctly set up
-  // const { country, community, program } = route.params as {
-  //   country: string;
-  //   community: string;
-  //   program: string;
-  // };
+  const { country, community, program } = route.params as {
+    country: string;
+    community: string;
+    program: string;
+  };
 
   const [state, setState] = useState({
     date: {
@@ -219,9 +219,9 @@ export default function SchoolInfo() {
       program_type: state.programType,
       num_children: state.numChildren,
       num_parents: state.numParents,
-      country: "Example Country", // change to country when URL params are set up
-      community: "Example Community", // change to community when URL params are set up
-      program: "Example Program", // change to program when URL params are set up
+      country: country, 
+      community: community,
+      program: program,
     };
 
     try {
@@ -256,7 +256,9 @@ export default function SchoolInfo() {
         <Text style={styles.schoolLocation}>Country</Text>
         {/* Past Entries Button */}
         <TouchableOpacity style={styles.pastEntriesButton}>
-          <Text style={styles.pastEntriesText}>Past Entries</Text>
+          <Link href={`/past_entries?country=${country}&community=${community}&program=${program}`}>
+            <Text style={styles.pastEntriesText}>Past Entries</Text>
+          </Link>
         </TouchableOpacity>
         {/* Create a New Entry Section */}
         <Text style={styles.sectionTitle}>Create a New Entry</Text>

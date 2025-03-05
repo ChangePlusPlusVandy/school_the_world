@@ -152,8 +152,8 @@ export class DatabaseService {
   }
 
   async addCommunity(
-    communityName: string,
-    countryName: string,
+    name: string,
+    country: string,
     id: string
   ): Promise<Community | null> {
     try {
@@ -161,8 +161,8 @@ export class DatabaseService {
       return await insertCommunity(
         this.db,
         id,
-        communityName,
-        countryName,
+        name,
+        country,
         this.getCommunityById.bind(this)
       );
     } catch (err) {
