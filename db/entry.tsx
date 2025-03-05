@@ -23,6 +23,7 @@ export interface Entry {
   country: string;
   community: string;
   program: string;
+  last_updated: number;
 }
 
 
@@ -79,6 +80,7 @@ export async function insertEntry(
   entry: Omit<Entry, "id">
 ): Promise<Entry | null> {
   try {
+    const now = Date.now();
     const result = await db.runAsync(
       `INSERT INTO entries (
         arrival_date, arrival_time, time_teachers_arrive, 
@@ -86,8 +88,8 @@ export async function insertEntry(
         recess_time, num_hours_children, num_teachers_absent, 
         cleanliness, playground_used, sinks_used, 
         classroom_decor, classrooms_used, observations, 
-        program_type, num_children, num_parents, country, community, program 
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        program_type, num_children, num_parents, country, community, program, last_updated
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         entry.arrival_date,
         entry.arrival_time,
@@ -109,7 +111,8 @@ export async function insertEntry(
         entry.num_parents,
         entry.country,
         entry.community,
-        entry.program
+        entry.program,
+        now
       ]
     );
 
@@ -150,6 +153,7 @@ export async function editEntry(
   newEntry: Entry
 ): Promise<Entry | null> {
   try {
+    const now = Date.now();
     const result = await db.runAsync(
       `UPDATE entries SET
         arrival_date = ?,
@@ -169,7 +173,8 @@ export async function editEntry(
         observations = ?,
         program_type = ?,
         num_children = ?,
-        num_parents = ?
+        num_parents = ?,
+        last_updated = ?
       WHERE id = ?`,
       [
         newEntry.arrival_date,
@@ -190,6 +195,7 @@ export async function editEntry(
         newEntry.program_type,
         newEntry.num_children,
         newEntry.num_parents,
+        now,
         entryId
       ]
     );

@@ -26,10 +26,22 @@ export class DatabaseService {
     try {
       this.db = await SQLite.openDatabaseAsync("local.db");
 
+      // **You may need to uncomment the code below if you run into a table conflict**
+      
+      // await this.db.execAsync(`
+      //   DROP TABLE IF EXISTS countries`);
+
+      // await this.db.execAsync(`
+      //   DROP TABLE IF EXISTS communities`);
+      
+      // await this.db.execAsync(`
+      //   DROP TABLE IF EXISTS entries`);
+
       await this.db.execAsync(`
         CREATE TABLE IF NOT EXISTS countries(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL
+          name TEXT NOT NULL,
+          last_updated INTEGER NOT NULL
         )
       `);
 
@@ -37,7 +49,8 @@ export class DatabaseService {
         CREATE TABLE IF NOT EXISTS communities(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
-          country INTEGER NOT NULL
+          country INTEGER NOT NULL,
+          last_updated INTEGER NOT NULL
         )
       `)
 
@@ -64,7 +77,8 @@ export class DatabaseService {
           num_parents TEXT NOT NULL,
           country INTEGER NOT NULL,
           community INTEGER NOT NULL,
-          program TEXT NOT NULL
+          program TEXT NOT NULL,
+          last_updated INTEGER NOT NULL
         )
       `);
 

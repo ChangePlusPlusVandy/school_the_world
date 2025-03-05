@@ -13,9 +13,11 @@ export async function insertCommunity(
   countryName: string,
   getById: (id: number) => Promise<Community | null>
 ): Promise<Community | null> {
+  const now = Date.now();
+
   const result = await db.runAsync(
-    `INSERT INTO communities (id, name, country) VALUES (?, ?, ?)`,
-    [id, communityName, countryName]
+    `INSERT INTO communities (id, name, country, last_updated) VALUES (?, ?, ?, ?)`,
+    [id, communityName, countryName, now]
   );
 
   if (result.changes > 0) {
@@ -31,9 +33,10 @@ export async function editCommunity(
   newCommunity: Community,
   id: number
 ): Promise<Community | null> {
+  const now = Date.now()
   const result = await db.runAsync(
-    `UPDATE communities SET country = ?, name = ? WHERE id = ?`,
-    [newCommunity.country, newCommunity.name, id]
+    `UPDATE communities SET country = ?, name = ?, last_updated = ? WHERE id = ?`,
+    [newCommunity.country, newCommunity.name, now, id]
   );
 
   if (result.changes > 0) {

@@ -11,8 +11,10 @@ export async function insertCountry(
   countryName: string,
   getById: (id: number) => Promise<Country | null>
 ): Promise<Country | null> {
-  const result = await db.runAsync(`INSERT INTO countries (name) VALUES (?)`, [
+  const now = Date.now();
+  const result = await db.runAsync(`INSERT INTO countries (name, last_updated) VALUES (?, ?)`, [
     countryName,
+    now
   ]);
 
   if (result.lastInsertRowId) {
@@ -39,8 +41,10 @@ export async function editCountry(
   id: number,
   newCountry: Country
 ): Promise<Country> {
-  await db.runAsync(`UPDATE countries SET name = ? WHERE id = ?`, [
+  const now = Date.now();
+  await db.runAsync(`UPDATE countries SET name = ?, last_updated = ? WHERE id = ?`, [
     newCountry.name,
+    now,
     id,
   ]);
   return newCountry;
