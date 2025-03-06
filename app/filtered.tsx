@@ -17,27 +17,41 @@ enum FilterType {
   EndDate = "End Date",
 }
 
-type FilterScreenProps = {
-  filterName: FilterType;
-  options: string[];
-  goBack: () => void;
-};
-
 export default function FilterPage() {
   const navigation = useNavigation();
   const [expandAddFiltersMenu, setExpandAddFiltersMenu] = useState(false);
-  const [currentFilter, setCurrentFilter] = useState<FilterType | null>(null);
-
-  useEffect(() => {
-    setExpandAddFiltersMenu(false);
-    setCurrentFilter(null);
-  }, []);
+  const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
+    null
+  );
+  const [currentFilterObject, setCurrentFilterObject] = useState<
+    Record<FilterType, any>
+  >({
+    [FilterType.Country]: null,
+    [FilterType.Community]: null,
+    [FilterType.StartDate]: null,
+    [FilterType.EndDate]: null,
+  });
 
   const testFilterOptions: Record<FilterType, string[]> = {
     [FilterType.Country]: ["Guatemala", "Honduras", "Panama"],
     [FilterType.Community]: ["Community A", "Community B", "Community C"],
     [FilterType.StartDate]: [],
     [FilterType.EndDate]: [],
+  };
+
+  useEffect(() => {
+    setExpandAddFiltersMenu(false);
+    setCurrentFilterType(null);
+    handleClearFilters();
+  }, []);
+
+  const handleClearFilters = () => {
+    setCurrentFilterObject({
+      [FilterType.Country]: null,
+      [FilterType.Community]: null,
+      [FilterType.StartDate]: null,
+      [FilterType.EndDate]: null,
+    });
   };
 
   return (
@@ -49,7 +63,7 @@ export default function FilterPage() {
         >
           <Feather name="chevron-left" size={24} color="darkblue" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity onPress={() => {}} style={styles.topBarButtons}>
           <AntDesign name="home" size={36} color="darkblue" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => {}} style={styles.topBarButtons}>
@@ -61,7 +75,7 @@ export default function FilterPage() {
         </TouchableOpacity>
       </View>
       <Text style={styles.title}>Filtered Data</Text>
-      {!currentFilter ? (
+      {!currentFilterType ? (
         <View style={styles.addFilters}>
           <TouchableOpacity
             style={styles.addFiltersHeader}
@@ -69,7 +83,7 @@ export default function FilterPage() {
           >
             <Text style={styles.addFiltersHeaderTitle}>Add Filters</Text>
             {expandAddFiltersMenu ? (
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => handleClearFilters()}>
                 <Text style={styles.addFiltersHeaderClearAll}>Clear All</Text>
               </TouchableOpacity>
             ) : (
@@ -86,7 +100,7 @@ export default function FilterPage() {
                   <TouchableOpacity
                     key={index}
                     style={styles.addFiltersMainDropdownItem}
-                    onPress={() => setCurrentFilter(item)}
+                    onPress={() => setCurrentFilterType(item)}
                   >
                     <Text style={styles.addFiltersMainDropdownItemText}>
                       {item}
@@ -99,10 +113,17 @@ export default function FilterPage() {
           )}
         </View>
       ) : (
-        <SpecificFilter
-          filterName={currentFilter}
-          options={testFilterOptions[currentFilter]}
-          goBack={() => setCurrentFilter(null)}
+        <ChildFilter
+          filterName={currentFilterType}
+          options={testFilterOptions[currentFilterType]}
+          goBack={() => setCurrentFilterType(null)}
+          currentSelectedObject={currentFilterObject}
+          saveFilter={(filterName, value) =>
+            setCurrentFilterObject({
+              ...currentFilterObject,
+              [filterName]: value,
+            })
+          }
         />
       )}
       <View>
@@ -115,17 +136,22 @@ export default function FilterPage() {
   );
 }
 
-const SpecificFilter: React.FC<FilterScreenProps> = ({
+type ChildFilterProps = {
+  filterName: FilterType;
+  options: string[];
+  goBack: () => void;
+  currentSelectedObject: Record<FilterType, any>;
+  saveFilter: (filterName: FilterType, value: any) => void;
+};
+
+const ChildFilter: React.FC<ChildFilterProps> = ({
   filterName,
   options,
   goBack,
+  currentSelectedObject,
+  saveFilter,
 }) => {
   const [searchText, setSearchText] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
-
-  useEffect(() => {
-    setSelected(null);
-  }, [filterName]);
 
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchText.toLowerCase())
@@ -164,10 +190,10 @@ const SpecificFilter: React.FC<FilterScreenProps> = ({
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.addFiltersMainDropdownItem}
-              onPress={() => setSelected(item)}
+              onPress={() => saveFilter(filterName, item)}
             >
               <Text style={styles.addFiltersMainDropdownItemText}>{item}</Text>
-              {selected === item && (
+              {currentSelectedObject[filterName] === item && (
                 <AntDesign name="check" size={12} color="green" />
               )}
             </TouchableOpacity>
