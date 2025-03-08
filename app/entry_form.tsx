@@ -21,6 +21,7 @@ type Time = {
 };
 
 type State = {
+  id: string;
   date: {
     month: string;
     day: string;
@@ -63,6 +64,7 @@ export default function SchoolInfo() {
   };
 
   const [state, setState] = useState({
+    id: "",
     date: {
       month: "",
       day: "",
@@ -92,17 +94,17 @@ export default function SchoolInfo() {
     observations: "",
   });
   // Initialize database
-    useEffect(() => {
-      const initializeDb = async () => {
-        const databaseService = await createDatabase();
-        setDb(databaseService);
-        console.log("Database initialized");
-      };
-  
-      initializeDb().catch((error) => {
-        console.error("Error initializing database: ", error);
-      });
-    }, []);
+  useEffect(() => {
+    const initializeDb = async () => {
+      const databaseService = await createDatabase();
+      setDb(databaseService);
+      console.log("Database initialized");
+    };
+
+    initializeDb().catch((error) => {
+      console.error("Error initializing database: ", error);
+    });
+  }, []);
 
   const handleInputChange = (name: keyof State, value: any) => {
     setState((prevState) => ({
@@ -112,29 +114,41 @@ export default function SchoolInfo() {
   };
 
   const handleNestedInputChange = (
-  category: keyof State,
-  subcategory: string,
-  field: string,
-  value: string
-) => {
-  setState((prevState) => {
-    // Ensure category exists and is an object
-    const updatedCategory = { ...(prevState[category] as Record<string, any>) };
+    category: keyof State,
+    subcategory: string,
+    field: string,
+    value: string
+  ) => {
+    setState((prevState) => {
+      // Ensure category exists and is an object
+      const updatedCategory = {
+        ...(prevState[category] as Record<string, any>),
+      };
 
-    // Ensure subcategory exists and is an object
-    const updatedSubcategory = {
-      ...(updatedCategory[subcategory] ?? {}), // Ensure it exists
-      [field]: value, // Update the field
-    };
+      // Ensure subcategory exists and is an object
+      const updatedSubcategory = {
+        ...(updatedCategory[subcategory] ?? {}), // Ensure it exists
+        [field]: value, // Update the field
+      };
 
-    updatedCategory[subcategory] = updatedSubcategory; // Assign back to category
+      updatedCategory[subcategory] = updatedSubcategory; // Assign back to category
 
-    return {
+      return {
+        ...prevState,
+        [category]: updatedCategory, // Assign updated category back to state
+      };
+    });
+  };
+
+  const handleDateChange = (field: string, value: string) => {
+    setState((prevState) => ({
       ...prevState,
-      [category]: updatedCategory, // Assign updated category back to state
-    };
-  });
-};
+      date: {
+        ...prevState.date,
+        [field]: value,
+      },
+    }));
+  };
 
   const recessTimes = [
     "10",
@@ -162,6 +176,7 @@ export default function SchoolInfo() {
 
   const clearForm = () => {
     setState({
+      id: "",
       date: {
         month: "",
         day: "",
@@ -192,15 +207,14 @@ export default function SchoolInfo() {
     });
   };
 
-
   const submitForm = async () => {
-
     if (!db) {
       console.error("Database not initialized");
       return;
     }
 
-    const entry: Omit<Entry, "id"> = {
+    const entry = {
+      id: String(Date.now()),
       arrival_date: `${state.date.year}-${state.date.month}-${state.date.day}`,
       arrival_time: `${state.times.arrivalTime.hour}:${state.times.arrivalTime.minute} ${state.times.arrivalTime.period}`,
       time_teachers_arrive: `${state.times.teacherArrivalTime.hour}:${state.times.teacherArrivalTime.minute} ${state.times.teacherArrivalTime.period}`,
@@ -219,9 +233,10 @@ export default function SchoolInfo() {
       program_type: state.programType,
       num_children: state.numChildren,
       num_parents: state.numParents,
-      country: country, 
+      country: country,
       community: community,
       program: program,
+      last_updated: Date.now(),
     };
 
     try {
@@ -256,7 +271,9 @@ export default function SchoolInfo() {
         <Text style={styles.schoolLocation}>Country</Text>
         {/* Past Entries Button */}
         <TouchableOpacity style={styles.pastEntriesButton}>
-          <Link href={`/past_entries?country=${country}&community=${community}&program=${program}`}>
+          <Link
+            href={`/past_entries?country=${country}&community=${community}&program=${program}`}
+          >
             <Text style={styles.pastEntriesText}>Past Entries</Text>
           </Link>
         </TouchableOpacity>
@@ -268,9 +285,7 @@ export default function SchoolInfo() {
           <View style={styles.dateInputContainer}>
             <TextInput
               value={state.date.month}
-              onChangeText={(text) =>
-                handleNestedInputChange("date", "month", "", text)
-              }
+              onChangeText={(text) => handleDateChange("month", text)}
               placeholder="MM"
               keyboardType="numeric"
               maxLength={2}
@@ -279,9 +294,7 @@ export default function SchoolInfo() {
             <Text style={styles.separator}>/</Text>
             <TextInput
               value={state.date.day}
-              onChangeText={(text) =>
-                handleNestedInputChange("date", "day", "", text)
-              }
+              onChangeText={(text) => handleDateChange("day", text)}
               placeholder="DD"
               keyboardType="numeric"
               maxLength={2}
@@ -290,9 +303,7 @@ export default function SchoolInfo() {
             <Text style={styles.separator}>/</Text>
             <TextInput
               value={state.date.year}
-              onChangeText={(text) =>
-                handleNestedInputChange("date", "year", "", text)
-              }
+              onChangeText={(text) => handleDateChange("year", text)}
               placeholder="YYYY"
               keyboardType="numeric"
               maxLength={4}
