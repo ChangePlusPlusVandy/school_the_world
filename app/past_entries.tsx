@@ -11,6 +11,7 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { createDatabase, DatabaseService } from "../db/base";
+import { useLocalSearchParams } from "expo-router";
 
 interface EntryData {
   id: string;
@@ -42,6 +43,9 @@ export default function PastEntriesScreen() {
   const [parentsAttended, setParentsAttended] = useState<number>(0);
   const [teachersAbsent, setTeachersAbsent] = useState<number>(0);
   const [cleanlinessScore, setCleanlinessScore] = useState<number>(0);
+  const { country } = useLocalSearchParams();
+  const { community } = useLocalSearchParams();
+  const { program } = useLocalSearchParams();
   // Initialize database
   useEffect(() => {
     const initializeDb = async () => {
@@ -61,7 +65,8 @@ export default function PastEntriesScreen() {
       return;
     }
     try {
-      const entries = await db.getEntries("country", "community", "program");
+      const entries = await db.getEntries(country as string, community as string, program as string);
+
       if (!entries) {
         console.log("No entries found");
         return;
@@ -118,7 +123,10 @@ export default function PastEntriesScreen() {
   };
 
   useEffect(() => {
-    fetchEntries();
+    if (db){
+      fetchEntries();
+    }
+
   }, [db]);
 
   const toggleExpand = (id: string) => {
