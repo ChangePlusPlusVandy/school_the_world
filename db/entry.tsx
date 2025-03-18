@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite";
-
+import UUID from "react-native-uuid";
 export interface Entry {
   id: string;
   arrival_date: string;
@@ -81,16 +81,19 @@ export async function insertEntry(
 ): Promise<Entry | null> {
   try {
     const now = Date.now();
+    const uniqueid = UUID.v4();
+
     const result = await db.runAsync(
       `INSERT INTO entries (
-        arrival_date, arrival_time, time_teachers_arrive, 
+        id, arrival_date, arrival_time, time_teachers_arrive, 
         time_children_leave, time_classes_start, time_classes_end, 
         recess_time, num_hours_children, num_teachers_absent, 
         cleanliness, playground_used, sinks_used, 
         classroom_decor, classrooms_used, observations, 
         program_type, num_children, num_parents, country, community, program, last_updated
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        uniqueid,
         entry.arrival_date,
         entry.arrival_time,
         entry.time_teachers_arrive,

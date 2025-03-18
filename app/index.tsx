@@ -3,14 +3,18 @@ import { Link } from "expo-router"
 import { Feather, MaterialIcons } from "@expo/vector-icons"
 import { createDatabase } from "@/db/base"
 import { useEffect } from "react"
+import { Button } from "react-native"
+import { firebaseSync } from "@/db/sync"
 
 export default function Homepage() {
-
+  useEffect(() => {
+    firebaseSync.initDatabase();
+  }, [])
 
   return (
     <View style={styles.container}>
       <MaterialIcons name="home" size={32} color="darkblue" />
-
+      <Button title="Sync" onPress={() => {firebaseSync.syncData()}}/>
       <Text style={styles.title}>Choose Page</Text>
 
       <Link href="/country_list" asChild>

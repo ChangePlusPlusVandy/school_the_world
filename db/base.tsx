@@ -56,7 +56,7 @@ export class DatabaseService {
 
       await this.db.execAsync(`
         CREATE TABLE IF NOT EXISTS entries(
-          id TEXT PRIMARY KEY,
+          id INTEGER PRIMARY KEY,
           arrival_date TEXT NOT NULL,
           arrival_time TEXT NOT NULL,
           time_teachers_arrive TEXT NOT NULL,
@@ -75,12 +75,16 @@ export class DatabaseService {
           program_type TEXT NOT NULL,
           num_children TEXT NOT NULL,
           num_parents TEXT NOT NULL,
-          country INTEGER NOT NULL,
-          community INTEGER NOT NULL,
+          country TEXT NOT NULL,
+          community TEXT NOT NULL,
           program TEXT NOT NULL,
           last_updated INTEGER NOT NULL
         )
       `);
+
+      await this.db.execAsync(
+        'CREATE TABLE IF NOT EXISTS app_metadata (key TEXT PRIMARY KEY, value TEXT)'
+      );
 
       console.log("db initialized successfully");
     } catch (err) {
