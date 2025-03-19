@@ -12,10 +12,10 @@ export interface Entry {
   num_hours_children: string;
   num_teachers_absent: string;
   cleanliness: string;
-  playground_used: boolean;
-  sinks_used: boolean;
+  playground_used: string;
+  sinks_used: string;
   classroom_decor: string;
-  classrooms_used: boolean;
+  classrooms_used: string;
   observations: string;
   program_type: string;
   num_children: string;
@@ -39,12 +39,7 @@ export async function getEntryById(
 
     if (!result) return null;
 
-    return {
-      ...result,
-      playground_used: Boolean(result.playground_used),
-      sinks_used: Boolean(result.sinks_used),
-      classrooms_used: Boolean(result.classrooms_used),
-    };
+    return result;
   } catch (error) {
     console.error("Error getting entry by id:", error);
     return null;

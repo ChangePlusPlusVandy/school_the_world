@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect } from "react";
 import { createDatabase, DatabaseService } from "../db/base";
 import { useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface EntryData {
   id: string;
@@ -28,9 +28,9 @@ interface EntryData {
     hoursInSchool: string;
     teachersAbsent: number;
     cleanlinessScore: number;
-    playgroundUsed: boolean;
-    wereToysUsed: boolean;
-    roomDecorations: boolean;
+    playgroundUsed: string;
+    wereToysUsed: string;
+    roomDecorations: string;
     otherObservations: string;
     lastUpdated: string;
   };
@@ -46,6 +46,7 @@ export default function PastEntriesScreen() {
   const { country } = useLocalSearchParams();
   const { community } = useLocalSearchParams();
   const { program } = useLocalSearchParams();
+
   // Initialize database
   useEffect(() => {
     const initializeDb = async () => {
@@ -90,7 +91,7 @@ export default function PastEntriesScreen() {
             cleanlinessScore: parseInt(entry.cleanliness),
             playgroundUsed: entry.playground_used,
             wereToysUsed: entry.sinks_used,
-            roomDecorations: entry.classroom_decor === "Yes",
+            roomDecorations: entry.classroom_decor,
             otherObservations: entry.observations,
             lastUpdated: new Date(entry.last_updated).toLocaleDateString(),
           },
@@ -122,12 +123,11 @@ export default function PastEntriesScreen() {
     }
   };
 
-  useEffect(() => {
-    if (db){
+  useFocusEffect(
+    useCallback(() => {
       fetchEntries();
-    }
-
-  }, [db]);
+    }, [db])
+  );
 
   const toggleExpand = (id: string) => {
     setEntries(
