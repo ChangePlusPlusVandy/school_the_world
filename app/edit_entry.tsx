@@ -12,7 +12,8 @@ import { useEffect } from "react";
 import { createDatabase, DatabaseService } from "../db/base";
 import { Entry } from "../db/entry";
 import { useRoute } from "@react-navigation/native";
-import { Link } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+
 
 type Time = {
   hour: string;
@@ -52,9 +53,10 @@ type State = {
 };
 
 export default function SchoolInfo() {
+  const { entryId } = useLocalSearchParams();
+  const entryIdStr = Array.isArray(entryId) ? entryId[0] : entryId;
   const handleBack = () => console.log("Back button pressed");
   const handleHome = () => console.log("Home button pressed");
-  const handleShare = () => console.log("Share button pressed");
   const [db, setDb] = useState<DatabaseService | null>(null);
   const route = useRoute();
   const { country, community, program } = route.params as {
@@ -207,13 +209,14 @@ export default function SchoolInfo() {
     });
   };
 
-  const submitForm = async () => {
+  const saveForm = async () => {
     if (!db) {
       console.error("Database not initialized");
       return;
     }
 
     const entry = {
+      id: String(Date.now()),
       arrival_date: `${state.date.year}-${state.date.month}-${state.date.day}`,
       arrival_time: `${state.times.arrivalTime.hour}:${state.times.arrivalTime.minute} ${state.times.arrivalTime.period}`,
       time_teachers_arrive: `${state.times.teacherArrivalTime.hour}:${state.times.teacherArrivalTime.minute} ${state.times.teacherArrivalTime.period}`,
@@ -239,10 +242,10 @@ export default function SchoolInfo() {
     };
 
     try {
-      const newEntry = await db.createEntry(entry);
-      console.log("Entry created successfully:", newEntry);
+      const editEntry = await db.editEntry(entryIdStr, entry);
+      console.log("Your edits were saved:", editEntry);
     } catch (error) {
-      console.error("Error creating entry:", error);
+      console.error("Error editing entry:", error);
     }
   };
   return (
@@ -257,27 +260,14 @@ export default function SchoolInfo() {
         <TouchableOpacity onPress={handleHome}>
           <FontAwesome name="home" size={48} color="#1e293b" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleShare}>
-          <View style={styles.iconWrapper}>
-            <FontAwesome name="share-alt" size={20} color="#374151" />
-          </View>
-        </TouchableOpacity>
       </View>
 
       {/* Main Content */}
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.schoolName}>Community Name</Text>
         <Text style={styles.schoolLocation}>Country</Text>
-        {/* Past Entries Button */}
-        <TouchableOpacity style={styles.pastEntriesButton}>
-          <Link
-            href={`/past_entries?country=${country}&community=${community}&program=${program}`}
-          >
-            <Text style={styles.pastEntriesText}>Past Entries</Text>
-          </Link>
-        </TouchableOpacity>
-        {/* Create a New Entry Section */}
-        <Text style={styles.sectionTitle}>Create a New Entry</Text>
+        {/* Edit Entry Section */}
+        <Text style={styles.sectionTitle}>Edit Entry</Text>
         {/* Arrival Date */}
         <View style={styles.entryBox}>
           <Text>Arrival Date:</Text>
@@ -807,10 +797,10 @@ export default function SchoolInfo() {
           />
         </View>
 
-        {/* Submit Button */}
+        {/* Save Button */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.submitButton} onPress={submitForm}>
-            <Text style={styles.submitButtonText}>Submit</Text>
+          <TouchableOpacity style={styles.saveButton} onPress={saveForm}>
+            <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.linkButton} onPress={clearForm}>
             <Text style={styles.linkButtonText}>Clear Form</Text>
@@ -868,21 +858,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: "#6b7280",
     marginBottom: 20,
-  },
-  pastEntriesButton: {
-    backgroundColor: "#1c2869",
-    width: "90%",
-    height: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 15,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  pastEntriesText: {
-    color: "#ffffff",
-    fontSize: 20,
   },
   sectionTitle: {
     alignSelf: "flex-start",
@@ -978,7 +953,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 0,
   },
-  submitButton: {
+  saveButton: {
     backgroundColor: "#0f1741",
     width: 100,
     height: 40,
@@ -987,7 +962,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 150,
   },
-  submitButtonText: {
+  saveButtonText: {
     color: "#ffffff",
     fontSize: 16,
     textAlign: "center",

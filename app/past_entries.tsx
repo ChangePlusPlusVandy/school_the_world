@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect } from "react";
 import { createDatabase, DatabaseService } from "../db/base";
 import { useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface EntryData {
   id: string;
@@ -28,9 +28,9 @@ interface EntryData {
     hoursInSchool: string;
     teachersAbsent: number;
     cleanlinessScore: number;
-    playgroundUsed: boolean;
-    wereToysUsed: boolean;
-    roomDecorations: boolean;
+    playgroundUsed: string;
+    wereToysUsed: string;
+    roomDecorations: string;
     otherObservations: string;
     lastUpdated: string;
   };
@@ -90,7 +90,7 @@ export default function PastEntriesScreen() {
             cleanlinessScore: parseInt(entry.cleanliness),
             playgroundUsed: entry.playground_used,
             wereToysUsed: entry.sinks_used,
-            roomDecorations: entry.classroom_decor === "Yes",
+            roomDecorations: entry.classroom_decor,
             otherObservations: entry.observations,
             lastUpdated: new Date(entry.last_updated).toLocaleDateString(),
           },
@@ -122,12 +122,11 @@ export default function PastEntriesScreen() {
     }
   };
 
-  useEffect(() => {
-    if (db){
+  useFocusEffect(
+    useCallback(() => {
       fetchEntries();
-    }
-
-  }, [db]);
+    }, [db])
+  );
 
   const toggleExpand = (id: string) => {
     setEntries(
@@ -138,7 +137,10 @@ export default function PastEntriesScreen() {
   };
 
   const handleEditEntry = (id: string) => {
-    console.log("Edit entry:", id);
+    router.push({
+      pathname: "/edit_entry",
+      params: { entryId: id },
+    });
   };
 
   const goBack = () => {
@@ -149,7 +151,7 @@ export default function PastEntriesScreen() {
     router.navigate("/");
   };
 
-  const renderEntryDetails = (details: EntryData["details"]) => (
+  const renderEntryDetails = (entryId: string, details: EntryData["details"]) => (
     <View style={styles.entryDetails}>
       <DataRow
         label="Time teachers arrive:"
@@ -193,7 +195,7 @@ export default function PastEntriesScreen() {
       />
       <DataRow label="Other observations:" value={details.otherObservations} />
 
-      <Pressable style={styles.editButton} onPress={() => handleEditEntry("1")}>
+      <Pressable style={styles.editButton} onPress={() => handleEditEntry(entryId)}>
         <Text style={styles.editButtonText}>Edit Entry</Text>
       </Pressable>
 
@@ -262,7 +264,7 @@ export default function PastEntriesScreen() {
                   color="#fff"
                 />
               </Pressable>
-              {entry.isExpanded && renderEntryDetails(entry.details)}
+              {entry.isExpanded && renderEntryDetails(entry.id, entry.details)}
             </View>
           ))}
         </View>
