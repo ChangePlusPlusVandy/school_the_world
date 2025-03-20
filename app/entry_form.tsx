@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -52,7 +53,8 @@ type State = {
 };
 
 export default function SchoolInfo() {
-  const handleBack = () => console.log("Back button pressed");
+  const router = useRouter();
+  const handleBack = () => router.push({pathname: '/choose_program'});
   const handleHome = () => console.log("Home button pressed");
   const handleShare = () => console.log("Share button pressed");
   const [db, setDb] = useState<DatabaseService | null>(null);
