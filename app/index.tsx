@@ -14,7 +14,13 @@ export default function Homepage() {
   return (
     <View style={styles.container}>
       <MaterialIcons name="home" size={32} color="darkblue" />
-      <Button title="Sync" onPress={() => {firebaseSync.syncData()}}/>
+      <Pressable 
+        style={styles.card} 
+        onPress={() => {firebaseSync.syncData()}}
+      >
+        <Text>Sync</Text>
+      </Pressable>
+
       <Text style={styles.title}>Choose Page</Text>
 
       <Link href="/country_list" asChild>
@@ -77,7 +83,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    alignItems: "flex-start",
+    alignItems: "center",
   },
   iconContainer: {
     backgroundColor: "#e8eaf6",
@@ -100,4 +106,3 @@ const styles = StyleSheet.create({
     color: "gray",
   },
 })
-
