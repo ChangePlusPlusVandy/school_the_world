@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { getApps, initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { Alert } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import Constants from "expo-constants";
@@ -35,7 +35,6 @@ export interface Entry {
   classroom_decor: string;
   classrooms_used: boolean;
   observations: string;
-  program_type: string;
   num_children: string;
   num_parents: string;
   country: string;
@@ -43,6 +42,22 @@ export interface Entry {
   program: string;
   last_updated: number;
 }
+
+interface DeletedCountry {
+  id: number
+}
+
+interface DeletedCommunity {
+  id: number,
+  country: string
+}
+
+interface DeletedEntry {
+  id: string,
+  country: string,
+  community: string
+}
+
 
 interface AppMetadataRow {
   value: string; // Assuming `value` is stored as a string in SQLite
@@ -105,6 +120,18 @@ export class FirebaseSync {
     }
   }
 
+  private async clearDeletionTables(): Promise<void> {
+    const db = this.getLocalDB();
+    
+    try {
+      await db.runAsync('DELETE FROM deleted_countries');
+      await db.runAsync('DELETE FROM deleted_communities');
+      await db.runAsync('DELETE FROM deleted_entries');
+    } catch (error) {
+      console.error('Error clearing deletion tracking tables:', error);
+    }
+  }
+
   private async upsertLocalData(table: string, data: any): Promise<void> {
     const db = this.getLocalDB();
     
@@ -132,10 +159,24 @@ export class FirebaseSync {
     try {
         // Upload local changes to Firestore (using Firebase v9 style)
         const localCountries = await this.getLocalData('countries', lastSyncTime);
+        const deletedCountryIds = await this.db?.getAllAsync(`
+          SELECT id
+          FROM deleted_countries
+        `) as DeletedCountry[];
+
+        console.log(deletedCountryIds);
         
         // Upload each country to Firestore
         for (const country of localCountries) {
           await setDoc(doc(firestore, 'countries', country.id.toString()), country, { merge: true });
+        }
+
+        for (const countryId of deletedCountryIds) {
+          try {
+            await deleteDoc(doc(firestore, 'countries', countryId.id.toString()));
+          } catch (deleteError) {
+            console.error(`Error deleting country ${countryId}:`, deleteError);
+          }
         }
 
         // Download changes from Firestore and upsert to local DB
@@ -179,14 +220,35 @@ export class FirebaseSync {
     try {
         // Upload local changes to Firestore
         const localCommunities = await this.getLocalData('communities', lastSyncTime);
+        const deletedCommunities = await this.db?.getAllAsync(`
+          SELECT id, country
+          FROM deleted_communities`
+        ) as DeletedCommunity[];
         
         for (const community of localCommunities) {
-          console.log(community);
             await setDoc(
                 doc(firestore, 'countries', community.country.toString(), 'communities', community.id.toString()),
                 community,
                 { merge: true }
             );
+        }
+        
+        if (deletedCommunities){
+          for (const deletedCommunity of deletedCommunities) {
+            try {
+              await deleteDoc(
+                doc(
+                  firestore, 
+                  'countries', 
+                  deletedCommunity.country.toString(), 
+                  'communities', 
+                  deletedCommunity.id.toString()
+                )
+              );
+            } catch (deleteError) {
+              console.error(`Error deleting community ${deletedCommunity.id}:`, deleteError);
+            }
+          }
         }
         
         // Download ALL changes from Firestore directly
@@ -240,6 +302,10 @@ export class FirebaseSync {
     try {
         // Upload local changes to Firestore
         const localEntries = await this.getLocalData('entries', lastSyncTime);
+        const deletedEntries = await this.db?.getAllAsync(`
+          SELECT id, country, community
+          FROM deleted_entries  
+        `) as DeletedEntry[];
 
         for (const entry of localEntries) {
             try {
@@ -274,6 +340,34 @@ export class FirebaseSync {
                 console.error(`Error processing entry ${entry.id}:`, error);
                 continue; // Skip this entry but continue with others
             }
+        }
+
+        for (const deletedEntry of deletedEntries) {
+          try {
+            // Find the community details to get its ID
+            const communityRows = await this.db?.getAllAsync(
+              'SELECT id FROM communities WHERE name = ? AND country = ?', 
+              [deletedEntry.community, deletedEntry.country]
+            ) as Community[];
+
+            if (communityRows.length > 0) {
+              const communityId = communityRows[0].id;
+              
+              await deleteDoc(
+                doc(
+                  firestore, 
+                  'countries', 
+                  deletedEntry.country, 
+                  'communities', 
+                  communityId.toString(), 
+                  'entries', 
+                  deletedEntry.id.toString()
+                )
+              );
+            }
+          } catch (deleteError) {
+            console.error(`Error deleting entry ${deletedEntry.id}:`, deleteError);
+          }
         }
 
         // Download ALL changes from Firestore directly
@@ -352,7 +446,6 @@ export class FirebaseSync {
                         classroom_decor: entryData.classroom_decor || '',
                         classrooms_used: Boolean(entryData.classrooms_used),
                         observations: entryData.observations || '',
-                        program_type: entryData.program_type || '',
                         num_children: entryData.num_children || '',
                         num_parents: entryData.num_parents || '',
                         program: entryData.program || '',
@@ -440,6 +533,7 @@ export class FirebaseSync {
       await this.syncCountries(lastSyncTime);
       await this.syncCommunities(lastSyncTime);
       await this.syncEntries(lastSyncTime);
+      await this.clearDeletionTables();
       
       // Update last sync time
       await this.updateLastSyncTime();

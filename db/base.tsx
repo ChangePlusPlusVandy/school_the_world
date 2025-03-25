@@ -72,7 +72,6 @@ export class DatabaseService {
           classroom_decor TEXT NOT NULL,
           classrooms_used TEXT NOT NULL,
           observations TEXT NOT NULL,
-          program_type TEXT NOT NULL,
           num_children TEXT NOT NULL,
           num_parents TEXT NOT NULL,
           country TEXT NOT NULL,
@@ -84,6 +83,28 @@ export class DatabaseService {
 
       await this.db.execAsync(
         'CREATE TABLE IF NOT EXISTS app_metadata (key TEXT PRIMARY KEY, value TEXT)'
+      );
+
+
+      await this.db.execAsync(
+        `CREATE TABLE IF NOT EXISTS deleted_countries (
+          id INTEGER PRIMARY KEY
+        )`
+      );
+
+      await this.db.execAsync(
+        `CREATE TABLE IF NOT EXISTS deleted_communities (
+          id INTEGER PRIMARY KEY,
+          country TEXT NOT NULL
+        )`
+      );
+
+      await this.db.execAsync(
+        `CREATE TABLE IF NOT EXISTS deleted_entries (
+          id TEXT PRIMARY KEY,
+          country TEXT NOT NULL,
+          community TEXT NOT NULL
+        )`
       );
 
       console.log("db initialized successfully");

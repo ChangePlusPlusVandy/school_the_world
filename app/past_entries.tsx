@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router, useRouter} from "expo-router";
-import { useEffect } from "react";
 import { createDatabase, DatabaseService } from "../db/base";
 import { useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";

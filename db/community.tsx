@@ -61,6 +61,10 @@ export const deleteCommunityByNameAndCountry = async (
     }
     await db.runAsync(`DELETE FROM communities WHERE name = ? AND country = ?`, [name, country]);
     await db.runAsync(`DELETE FROM entries WHERE community = ?`, [community.name]);
+    await db.runAsync(
+      `INSERT INTO deleted_communities (id, country) VALUES (?, ?) `,
+      [community.id, community.country]
+    )
     return community;
   } catch (error) {
     console.error("Failed to delete community by name and country.", error);

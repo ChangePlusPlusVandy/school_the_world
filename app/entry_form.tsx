@@ -38,7 +38,6 @@ type State = {
   recessDropdown: boolean;
   schoolTimeDropdown: boolean;
   teacherDropdown: boolean;
-  programType: string;
   numChildren: string;
   numParents: string;
   absentTeachers: string;
@@ -82,7 +81,6 @@ export default function SchoolInfo() {
     recessDropdown: false,
     schoolTimeDropdown: false,
     teacherDropdown: false,
-    programType: "",
     numChildren: "",
     numParents: "",
     absentTeachers: "",
@@ -194,7 +192,6 @@ export default function SchoolInfo() {
       recessDropdown: false,
       schoolTimeDropdown: false,
       teacherDropdown: false,
-      programType: "",
       numChildren: "",
       numParents: "",
       absentTeachers: "",
@@ -231,7 +228,6 @@ export default function SchoolInfo() {
       classroom_decor: state.decorationUse,
       classrooms_used: state.classroomUse,
       observations: state.observations,
-      program_type: state.programType,
       num_children: state.numChildren,
       num_parents: state.numParents,
       country: country,
@@ -358,25 +354,6 @@ export default function SchoolInfo() {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Program Type */}
-        <View style={styles.entryBox}>
-          <Text style={styles.entryLabel}>Program Type</Text>
-          {programTypeOptions.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.radioItem}
-              onPress={() => handleInputChange("programType", option)}
-            >
-              <View style={styles.radioCircle}>
-                {state.programType === option && (
-                  <View style={styles.radioSelected} />
-                )}
-              </View>
-              <Text style={styles.radioText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
         </View>
         {/* Number of Children */}
         <View style={styles.entryBox}>

@@ -17,7 +17,6 @@ export interface Entry {
   classroom_decor: string;
   classrooms_used: string;
   observations: string;
-  program_type: string;
   num_children: string;
   num_parents: string;
   country: string;
@@ -55,7 +54,7 @@ export async function getEntries(
   try {
     //get all desired entries 
     const entries = await db.getAllAsync<Entry>(
-      `SELECT * FROM entries WHERE country = ? AND community = ? AND program_type = ?`,
+      `SELECT * FROM entries WHERE country = ? AND community = ? AND program = ?`,
       [country, community, programType]
     );
     
@@ -85,8 +84,8 @@ export async function insertEntry(
         recess_time, num_hours_children, num_teachers_absent, 
         cleanliness, playground_used, sinks_used, 
         classroom_decor, classrooms_used, observations, 
-        program_type, num_children, num_parents, country, community, program, last_updated
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        num_children, num_parents, country, community, program, last_updated
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         uniqueid,
         entry.arrival_date,
@@ -104,7 +103,6 @@ export async function insertEntry(
         entry.classroom_decor,
         entry.classrooms_used ? 1 : 0,
         entry.observations,
-        entry.program_type,
         entry.num_children,
         entry.num_parents,
         entry.country,
@@ -138,6 +136,11 @@ export const deleteEntryById = async (
       return null;
     }
     await db.runAsync(`DELETE FROM entries WHERE id = ?`, [id]);
+    
+    await db.runAsync(
+      `INSERT INTO deleted_entries (id, country, community) VALUES (?, ?, ?) `,
+      [id, entry.country, entry.community]
+    )
     return entry;
   } catch (error) {
     console.error("Fail to delete entry by id.");
@@ -169,7 +172,6 @@ export async function editEntry(
         classroom_decor = ?,
         classrooms_used = ?,
         observations = ?,
-        program_type = ?,
         num_children = ?,
         num_parents = ?,
         last_updated = ?
@@ -190,7 +192,6 @@ export async function editEntry(
         newEntry.classroom_decor,
         newEntry.classrooms_used ? 1 : 0,
         newEntry.observations,
-        newEntry.program_type,
         newEntry.num_children,
         newEntry.num_parents,
         now,
