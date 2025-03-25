@@ -3,8 +3,11 @@ import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView,
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService} from "../db/base";
+import { useRouter } from 'expo-router';
+import { useRoute } from "@react-navigation/native";
 
 export default function DataTrackingCountry() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [countries, setCountries] = useState<string[]>([]);
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
@@ -111,7 +114,9 @@ export default function DataTrackingCountry() {
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
-        <MaterialIcons name="arrow-back" size={30} />
+        <TouchableOpacity onPress={() => router.back()}>
+          <MaterialIcons name="arrow-back" size={30} />
+        </TouchableOpacity>
         <MaterialIcons name="home-filled" size={50} />
         <MaterialIcons name="upload" size={40} />
       </View>
