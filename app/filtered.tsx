@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,8 +8,8 @@ import {
   FlatList,
 } from "react-native";
 import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { createDatabase, DatabaseService } from "../db/base";
 
 enum FilterType {
   Country = "Country",
@@ -32,18 +33,72 @@ export default function FilterPage() {
     [FilterType.EndDate]: null,
   });
 
-  const testFilterOptions: Record<FilterType, string[]> = {
-    [FilterType.Country]: ["Guatemala", "Honduras", "Panama"],
-    [FilterType.Community]: ["Community A", "Community B", "Community C"],
-    [FilterType.StartDate]: [],
-    [FilterType.EndDate]: [],
-  };
+  const [db, setDb] = useState<DatabaseService | null>(null);
+  const [countries, setCountries] = useState<string[]>([]);
+  const [communities, setCommunities] = useState<string[]>([]);
 
+  // Initialize database and fetch countries
   useEffect(() => {
-    setExpandAddFiltersMenu(false);
-    setCurrentFilterType(null);
-    handleClearFilters();
+    const initializeDb = async () => {
+      try {
+        const databaseService = await createDatabase();
+        setDb(databaseService);
+        const fetchedCountries = await databaseService.getAllCountries();
+        if (fetchedCountries) {
+          setCountries(fetchedCountries.map((country) => country.name));
+        }
+      } catch (error) {
+        console.error("Error initializing database: ", error);
+      }
+    };
+
+    initializeDb();
   }, []);
+
+  // Fetch communities based on selected country (or all communities if no country is selected)
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      if (db) {
+        try {
+          let fetchedCommunities: string[] = [];
+
+          if (currentFilterObject[FilterType.Country]) {
+            // Fetch communities for the selected country
+            const communitiesForCountry = await db.getCommunitiesByCountry(
+              currentFilterObject[FilterType.Country]
+            );
+            if (communitiesForCountry) {
+              fetchedCommunities = communitiesForCountry.map(
+                (community) => community.name
+              );
+            }
+          } else {
+            // Fetch communities for all countries
+            const allCountries = await db.getAllCountries();
+            if (allCountries) {
+              for (const country of allCountries) {
+                const communitiesForCountry = await db.getCommunitiesByCountry(
+                  country.name
+                );
+                if (communitiesForCountry) {
+                  fetchedCommunities = [
+                    ...fetchedCommunities,
+                    ...communitiesForCountry.map((community) => community.name),
+                  ];
+                }
+              }
+            }
+          }
+
+          setCommunities(fetchedCommunities);
+        } catch (error) {
+          console.error("Error fetching communities: ", error);
+        }
+      }
+    };
+
+    fetchCommunities();
+  }, [currentFilterObject[FilterType.Country], db]);
 
   const handleClearFilters = () => {
     setCurrentFilterObject({
@@ -52,6 +107,13 @@ export default function FilterPage() {
       [FilterType.StartDate]: null,
       [FilterType.EndDate]: null,
     });
+  };
+
+  const handleSaveFilter = (filterName: FilterType, value: any) => {
+    setCurrentFilterObject((prev) => ({
+      ...prev,
+      [filterName]: value,
+    }));
   };
 
   return (
@@ -74,7 +136,9 @@ export default function FilterPage() {
           />
         </TouchableOpacity>
       </View>
+
       <Text style={styles.title}>Filtered Data</Text>
+
       {!currentFilterType ? (
         <View style={styles.addFilters}>
           <TouchableOpacity
@@ -83,7 +147,7 @@ export default function FilterPage() {
           >
             <Text style={styles.addFiltersHeaderTitle}>Add Filters</Text>
             {expandAddFiltersMenu ? (
-              <TouchableOpacity onPress={() => handleClearFilters()}>
+              <TouchableOpacity onPress={handleClearFilters}>
                 <Text style={styles.addFiltersHeaderClearAll}>Clear All</Text>
               </TouchableOpacity>
             ) : (
@@ -96,9 +160,8 @@ export default function FilterPage() {
               <FlatList
                 data={Object.values(FilterType)}
                 keyExtractor={(item) => item}
-                renderItem={({ item, index }) => (
+                renderItem={({ item }) => (
                   <TouchableOpacity
-                    key={index}
                     style={styles.addFiltersMainDropdownItem}
                     onPress={() => setCurrentFilterType(item)}
                   >
@@ -115,17 +178,19 @@ export default function FilterPage() {
       ) : (
         <ChildFilter
           filterName={currentFilterType}
-          options={testFilterOptions[currentFilterType]}
+          options={
+            currentFilterType === FilterType.Country
+              ? countries
+              : currentFilterType === FilterType.Community
+                ? communities
+                : []
+          }
           goBack={() => setCurrentFilterType(null)}
           currentSelectedObject={currentFilterObject}
-          saveFilter={(filterName, value) =>
-            setCurrentFilterObject({
-              ...currentFilterObject,
-              [filterName]: value,
-            })
-          }
+          saveFilter={handleSaveFilter}
         />
       )}
+
       <View>
         <Text>Box 1</Text>
       </View>
@@ -160,13 +225,14 @@ const ChildFilter: React.FC<ChildFilterProps> = ({
   return (
     <View style={styles.addFilters}>
       <View style={styles.addFiltersChildDropdownHeader}>
-        <TouchableOpacity onPress={() => goBack()}>
+        <TouchableOpacity onPress={goBack}>
           <AntDesign name="left" size={15} color="black" />
         </TouchableOpacity>
         <Text style={styles.addFiltersChildDropdownHeaderTitle}>
           {filterName}
         </Text>
       </View>
+
       <View style={styles.addFiltersMainDropdown}>
         <View style={styles.addFiltersChildDropdownSearchContainer}>
           <Feather
@@ -226,7 +292,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  title: { paddingTop: 40, fontSize: 25, fontWeight: "bold" },
+  title: {
+    paddingTop: 40,
+    fontSize: 25,
+    fontWeight: "bold",
+  },
   addFilters: {
     backgroundColor: "#fff",
     borderRadius: 10,
