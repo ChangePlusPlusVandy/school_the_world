@@ -10,11 +10,12 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter} from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
 
 export default function DataTrackingCountry() {
+  const router = useRouter();
   const { country } = useLocalSearchParams();
   const { community } = useLocalSearchParams();
 
@@ -27,7 +28,9 @@ export default function DataTrackingCountry() {
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
-        <MaterialIcons name="arrow-back" size={30} />
+        <TouchableOpacity onPress={() => router.push({pathname: '/community_list'})}>
+          <MaterialIcons name="arrow-back" size={30} />
+        </TouchableOpacity>
         <MaterialIcons name="home-filled" size={50} />
         <MaterialIcons name="upload" size={40} />
       </View>

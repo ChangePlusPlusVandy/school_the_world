@@ -8,7 +8,8 @@ import {
   Pressable,
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useRouter} from "expo-router";
+import { useEffect } from "react";
 import { createDatabase, DatabaseService } from "../db/base";
 import { useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -37,6 +38,7 @@ interface EntryData {
 }
 
 export default function PastEntriesScreen() {
+  const router = useRouter();
   const [db, setDb] = useState<DatabaseService | null>(null);
   const [entries, setEntries] = useState<EntryData[]>([]);
   const [studentsAttended, setStudentsAttended] = useState<number>(0);
@@ -142,7 +144,7 @@ export default function PastEntriesScreen() {
   };
 
   const goBack = () => {
-    router.back();
+    router.push({pathname: './entry_form'})
   };
 
   const goHome = () => {
