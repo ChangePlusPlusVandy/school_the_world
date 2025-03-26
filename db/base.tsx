@@ -56,7 +56,7 @@ export class DatabaseService {
 
       await this.db.execAsync(`
         CREATE TABLE IF NOT EXISTS entries(
-          id INTEGER PRIMARY KEY,
+          id TEXT PRIMARY KEY,
           arrival_date TEXT NOT NULL,
           arrival_time TEXT NOT NULL,
           time_teachers_arrive TEXT NOT NULL,
@@ -67,12 +67,11 @@ export class DatabaseService {
           num_hours_children TEXT NOT NULL,
           num_teachers_absent TEXT NOT NULL,
           cleanliness TEXT NOT NULL,
-          playground_used INTEGER NOT NULL,
-          sinks_used INTEGER NOT NULL,
+          playground_used TEXT NOT NULL,
+          sinks_used TEXT NOT NULL,
           classroom_decor TEXT NOT NULL,
-          classrooms_used INTEGER NOT NULL,
+          classrooms_used TEXT NOT NULL,
           observations TEXT NOT NULL,
-          program_type TEXT NOT NULL,
           num_children TEXT NOT NULL,
           num_parents TEXT NOT NULL,
           country TEXT NOT NULL,
@@ -84,6 +83,28 @@ export class DatabaseService {
 
       await this.db.execAsync(
         'CREATE TABLE IF NOT EXISTS app_metadata (key TEXT PRIMARY KEY, value TEXT)'
+      );
+
+
+      await this.db.execAsync(
+        `CREATE TABLE IF NOT EXISTS deleted_countries (
+          id INTEGER PRIMARY KEY
+        )`
+      );
+
+      await this.db.execAsync(
+        `CREATE TABLE IF NOT EXISTS deleted_communities (
+          id INTEGER PRIMARY KEY,
+          country TEXT NOT NULL
+        )`
+      );
+
+      await this.db.execAsync(
+        `CREATE TABLE IF NOT EXISTS deleted_entries (
+          id TEXT PRIMARY KEY,
+          country TEXT NOT NULL,
+          community TEXT NOT NULL
+        )`
       );
 
       console.log("db initialized successfully");

@@ -64,6 +64,7 @@ export const deleteCountry = async (
       return null;
     }
 
+
     await db.runAsync(`DELETE FROM countries WHERE id = ?`, [id]);      //delete the country from the country table
     await db.runAsync(                //delete all entries relevant to the given country 
       `DELETE FROM entries WHERE country = ?`,
@@ -72,6 +73,11 @@ export const deleteCountry = async (
     await db.runAsync(
       'DELETE FROM communities WHERE country = ?',
       [country.name]                   //delete all communities relevant to the given country
+    )
+    
+    await db.runAsync(
+      `INSERT INTO deleted_countries (id) VALUES (?) `,
+      [id]
     )
     return country;
   } catch (error) {

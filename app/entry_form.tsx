@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -37,11 +38,10 @@ type State = {
   recessDropdown: boolean;
   schoolTimeDropdown: boolean;
   teacherDropdown: boolean;
-  programType: string;
   numChildren: string;
   numParents: string;
   absentTeachers: string;
-  cleanliness: number;
+  cleanliness: string;
   playgroundUse: string;
   recessTime: string;
   schoolTime: string;
@@ -52,7 +52,8 @@ type State = {
 };
 
 export default function SchoolInfo() {
-  const handleBack = () => console.log("Back button pressed");
+  const router = useRouter();
+  const handleBack = () => router.push({pathname: '/choose_program'});
   const handleHome = () => console.log("Home button pressed");
   const handleShare = () => console.log("Share button pressed");
   const [db, setDb] = useState<DatabaseService | null>(null);
@@ -80,11 +81,10 @@ export default function SchoolInfo() {
     recessDropdown: false,
     schoolTimeDropdown: false,
     teacherDropdown: false,
-    programType: "",
     numChildren: "",
     numParents: "",
     absentTeachers: "",
-    cleanliness: 0,
+    cleanliness: "",
     playgroundUse: "",
     recessTime: "",
     schoolTime: "",
@@ -164,7 +164,7 @@ export default function SchoolInfo() {
     "60",
   ];
   const count = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-  const cleanlinessOptions = [1, 2, 3, 4, 5];
+  const cleanlinessOptions = ["1", "2", "3", "4", "5"];
   const programTypeOptions = ["Early Childhood", "Primary", "Middle"];
   const usageOptions = ["Yes", "No", "This observation could not be made"];
   const decorationOptions = [
@@ -192,11 +192,10 @@ export default function SchoolInfo() {
       recessDropdown: false,
       schoolTimeDropdown: false,
       teacherDropdown: false,
-      programType: "",
       numChildren: "",
       numParents: "",
       absentTeachers: "",
-      cleanliness: 0,
+      cleanliness: "",
       playgroundUse: "",
       recessTime: "",
       schoolTime: "",
@@ -214,7 +213,6 @@ export default function SchoolInfo() {
     }
 
     const entry = {
-      id: String(Date.now()),
       arrival_date: `${state.date.year}-${state.date.month}-${state.date.day}`,
       arrival_time: `${state.times.arrivalTime.hour}:${state.times.arrivalTime.minute} ${state.times.arrivalTime.period}`,
       time_teachers_arrive: `${state.times.teacherArrivalTime.hour}:${state.times.teacherArrivalTime.minute} ${state.times.teacherArrivalTime.period}`,
@@ -224,13 +222,12 @@ export default function SchoolInfo() {
       recess_time: state.recessTime,
       num_hours_children: state.schoolTime,
       num_teachers_absent: state.absentTeachers,
-      cleanliness: state.cleanliness.toString(),
-      playground_used: state.playgroundUse === "Yes",
-      sinks_used: state.sinkUse === "Yes",
+      cleanliness: state.cleanliness,
+      playground_used: state.playgroundUse,
+      sinks_used: state.sinkUse,
       classroom_decor: state.decorationUse,
-      classrooms_used: state.classroomUse === "Yes",
+      classrooms_used: state.classroomUse,
       observations: state.observations,
-      program_type: state.programType,
       num_children: state.numChildren,
       num_parents: state.numParents,
       country: country,
@@ -357,25 +354,6 @@ export default function SchoolInfo() {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Program Type */}
-        <View style={styles.entryBox}>
-          <Text style={styles.entryLabel}>Program Type</Text>
-          {programTypeOptions.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.radioItem}
-              onPress={() => handleInputChange("programType", option)}
-            >
-              <View style={styles.radioCircle}>
-                {state.programType === option && (
-                  <View style={styles.radioSelected} />
-                )}
-              </View>
-              <Text style={styles.radioText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
         </View>
         {/* Number of Children */}
         <View style={styles.entryBox}>
