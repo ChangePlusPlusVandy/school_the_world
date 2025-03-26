@@ -1,9 +1,7 @@
 import { StyleSheet, View, Text, Pressable } from "react-native"
 import { Link } from "expo-router"
 import { Feather, MaterialIcons } from "@expo/vector-icons"
-import { createDatabase } from "@/db/base"
 import { useEffect } from "react"
-import { Button } from "react-native"
 import { firebaseSync } from "@/db/sync"
 
 export default function Homepage() {
@@ -14,12 +12,6 @@ export default function Homepage() {
   return (
     <View style={styles.container}>
       <MaterialIcons name="home" size={32} color="darkblue" />
-      <Pressable 
-        style={styles.card} 
-        onPress={() => {firebaseSync.syncData()}}
-      >
-        <Text>Sync</Text>
-      </Pressable>
 
       <Text style={styles.title}>Choose Page</Text>
 
@@ -50,6 +42,13 @@ export default function Homepage() {
           </View>
         </Pressable>
       </Link>
+
+      <Pressable 
+        style={styles.syncButton} 
+        onPress={() => {firebaseSync.syncData()}}
+      >
+        <Text style={styles.syncButtonText}>Sync</Text>
+      </Pressable>
     </View>
   )
 }
@@ -104,5 +103,19 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 14,
     color: "gray",
+  },
+  syncButton: {
+    backgroundColor: "#2196F3", // Blue color
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: "25%",
+    alignItems: "center",
+    marginTop: 16,
+  },
+  syncButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
   },
 })
