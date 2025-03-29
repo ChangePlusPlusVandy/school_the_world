@@ -7,7 +7,12 @@ import {
   TextInput,
   FlatList,
 } from "react-native";
-import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { createDatabase, DatabaseService } from "../db/base";
 
@@ -17,6 +22,75 @@ enum FilterType {
   StartDate = "Start Date",
   EndDate = "End Date",
 }
+
+type ChildFilterProps = {
+  filterName: FilterType;
+  options: string[];
+  goBack: () => void;
+  currentSelectedObject: Record<FilterType, any>;
+  saveFilter: (filterName: FilterType, value: any) => void;
+};
+
+const ChildFilter: React.FC<ChildFilterProps> = ({
+  filterName,
+  options,
+  goBack,
+  currentSelectedObject,
+  saveFilter,
+}) => {
+  const [searchText, setSearchText] = useState("");
+
+  const filteredOptions = options.filter((option) =>
+    option.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  return (
+    <View style={styles.addFilters}>
+      <View style={styles.addFiltersChildDropdownHeader}>
+        <TouchableOpacity onPress={goBack}>
+          <AntDesign name="left" size={15} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.addFiltersChildDropdownHeaderTitle}>
+          {filterName}
+        </Text>
+      </View>
+
+      <View style={styles.addFiltersMainDropdown}>
+        <View style={styles.addFiltersChildDropdownSearchContainer}>
+          <Feather
+            name="search"
+            size={18}
+            color="gray"
+            style={styles.addFiltersChildDropdownSearchIcon}
+          />
+          <TextInput
+            style={styles.addFiltersChildDropdownSearchInput}
+            placeholder="Search..."
+            placeholderTextColor="gray"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+        </View>
+
+        <FlatList
+          data={filteredOptions}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.addFiltersMainDropdownItem}
+              onPress={() => saveFilter(filterName, item)}
+            >
+              <Text style={styles.addFiltersMainDropdownItemText}>{item}</Text>
+              {currentSelectedObject[filterName] === item && (
+                <AntDesign name="check" size={12} color="green" />
+              )}
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    </View>
+  );
+};
 
 export default function FilterPage() {
   const navigation = useNavigation();
@@ -121,17 +195,20 @@ export default function FilterPage() {
       <View style={styles.topBar}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={styles.topBarButtons}
+          style={{ position: "absolute", left: 10 }}
         >
-          <Feather name="chevron-left" size={24} color="darkblue" />
+          <MaterialIcons name="chevron-left" size={30} color="darkblue" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {}} style={styles.topBarButtons}>
-          <AntDesign name="home" size={36} color="darkblue" />
+        <TouchableOpacity onPress={() => {}}>
+          <MaterialIcons name="home" size={32} color="darkblue" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {}} style={styles.topBarButtons}>
+        <TouchableOpacity
+          onPress={() => {}}
+          style={{ position: "absolute", right: 10 }}
+        >
           <MaterialCommunityIcons
             name="export-variant"
-            size={20}
+            size={24}
             color="darkblue"
           />
         </TouchableOpacity>
@@ -201,101 +278,27 @@ export default function FilterPage() {
   );
 }
 
-type ChildFilterProps = {
-  filterName: FilterType;
-  options: string[];
-  goBack: () => void;
-  currentSelectedObject: Record<FilterType, any>;
-  saveFilter: (filterName: FilterType, value: any) => void;
-};
-
-const ChildFilter: React.FC<ChildFilterProps> = ({
-  filterName,
-  options,
-  goBack,
-  currentSelectedObject,
-  saveFilter,
-}) => {
-  const [searchText, setSearchText] = useState("");
-
-  const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  return (
-    <View style={styles.addFilters}>
-      <View style={styles.addFiltersChildDropdownHeader}>
-        <TouchableOpacity onPress={goBack}>
-          <AntDesign name="left" size={15} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.addFiltersChildDropdownHeaderTitle}>
-          {filterName}
-        </Text>
-      </View>
-
-      <View style={styles.addFiltersMainDropdown}>
-        <View style={styles.addFiltersChildDropdownSearchContainer}>
-          <Feather
-            name="search"
-            size={18}
-            color="gray"
-            style={styles.addFiltersChildDropdownSearchIcon}
-          />
-          <TextInput
-            style={styles.addFiltersChildDropdownSearchInput}
-            placeholder="Search..."
-            placeholderTextColor="gray"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-        </View>
-
-        <FlatList
-          data={filteredOptions}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.addFiltersMainDropdownItem}
-              onPress={() => saveFilter(filterName, item)}
-            >
-              <Text style={styles.addFiltersMainDropdownItemText}>{item}</Text>
-              {currentSelectedObject[filterName] === item && (
-                <AntDesign name="check" size={12} color="green" />
-              )}
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f5f7fa",
     alignItems: "center",
-    backgroundColor: "#EFF2F7",
-    paddingTop: 40,
-    paddingHorizontal: "5%",
+    paddingTop: 60,
+    paddingHorizontal: 20,
   },
   topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-  },
-  topBarButtons: {
-    width: 40,
-    height: 40,
-    borderRadius: 5,
-    backgroundColor: "#e8eaf6",
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+    flexDirection: "row",
+    width: "100%",
   },
   title: {
-    paddingTop: 40,
-    fontSize: 25,
+    fontSize: 28,
     fontWeight: "bold",
+    marginTop: 24,
+    marginBottom: 32,
+    paddingBottom: "3%",
   },
   addFilters: {
     backgroundColor: "#fff",
@@ -305,9 +308,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 3,
-    width: "100%",
-    marginHorizontal: "10%",
-    marginTop: 20,
+    width: "85%",
+    marginBottom: 16,
   },
   addFiltersHeader: {
     flexDirection: "row",
