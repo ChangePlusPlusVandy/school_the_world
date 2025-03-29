@@ -155,6 +155,15 @@ export async function editEntry(
 ): Promise<Entry | null> {
   try {
     const now = Date.now();
+    
+    // Convert string boolean values to numbers
+    const convertToNumber = (value: string) => {
+      if (value === "1" || value === "Yes") return 1;
+      if (value === "0" || value === "No") return 0;
+      if (value === "2" || value === "This observation could not be made") return 2;
+      return 0;
+    };
+
     const result = await db.runAsync(
       `UPDATE entries SET
         arrival_date = ?,
@@ -187,10 +196,10 @@ export async function editEntry(
         newEntry.num_hours_children,
         newEntry.num_teachers_absent,
         newEntry.cleanliness,
-        newEntry.playground_used ? 1 : 0,
-        newEntry.sinks_used ? 1 : 0,
+        convertToNumber(newEntry.playground_used),
+        convertToNumber(newEntry.sinks_used),
         newEntry.classroom_decor,
-        newEntry.classrooms_used ? 1 : 0,
+        convertToNumber(newEntry.classrooms_used),
         newEntry.observations,
         newEntry.num_children,
         newEntry.num_parents,

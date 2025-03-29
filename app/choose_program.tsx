@@ -13,6 +13,7 @@ import {
 import { Link, useLocalSearchParams, useRouter} from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
+import ProgressBar from './components/ProgressBar';
 
 export default function DataTrackingCountry() {
   const router = useRouter();
@@ -44,6 +45,8 @@ export default function DataTrackingCountry() {
           </Link>
         </View>
       ))}
+
+      <ProgressBar currentStep={3} />
     </View>
   );
 }

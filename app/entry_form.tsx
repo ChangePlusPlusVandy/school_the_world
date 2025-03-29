@@ -14,6 +14,7 @@ import { createDatabase, DatabaseService } from "../db/base";
 import { Entry } from "../db/entry";
 import { useRoute } from "@react-navigation/native";
 import { Link } from "expo-router";
+import ProgressBar from './components/ProgressBar';
 
 type Time = {
   hour: string;
@@ -796,6 +797,8 @@ export default function SchoolInfo() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <ProgressBar currentStep={4} />
     </View>
   );
 }
