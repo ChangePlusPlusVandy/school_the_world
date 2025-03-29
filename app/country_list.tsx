@@ -5,6 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService} from "../db/base";
 import { useRouter } from 'expo-router';
 import { useRoute } from "@react-navigation/native";
+import ProgressBar from './components/ProgressBar';
 
 export default function DataTrackingCountry() {
   const router = useRouter();
@@ -177,6 +178,8 @@ export default function DataTrackingCountry() {
           </View>
         </View>
       </Modal>
+
+      <ProgressBar currentStep={1} />
     </View>
   );
 }

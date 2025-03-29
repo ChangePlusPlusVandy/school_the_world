@@ -8,10 +8,11 @@ import {
   Pressable,
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import { router, useRouter} from "expo-router";
+import { router } from "expo-router";
 import { createDatabase, DatabaseService } from "../db/base";
 import { useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
+import ProgressBar from './components/ProgressBar';
 
 interface EntryData {
   id: string;
@@ -37,7 +38,6 @@ interface EntryData {
 }
 
 export default function PastEntriesScreen() {
-  const router = useRouter();
   const [db, setDb] = useState<DatabaseService | null>(null);
   const [entries, setEntries] = useState<EntryData[]>([]);
   const [studentsAttended, setStudentsAttended] = useState<number>(0);
@@ -47,7 +47,6 @@ export default function PastEntriesScreen() {
   const { country } = useLocalSearchParams();
   const { community } = useLocalSearchParams();
   const { program } = useLocalSearchParams();
-
   // Initialize database
   useEffect(() => {
     const initializeDb = async () => {
@@ -74,6 +73,14 @@ export default function PastEntriesScreen() {
         return;
       }
 
+      // Convert database values to display values
+      const convertToDisplayValue = (value: string) => {
+        if (value === "1") return "Yes";
+        if (value === "0") return "No";
+        if (value === "2") return "This observation could not be made";
+        return value;
+      };
+
       setEntries(
         entries.map((entry) => ({
           id: entry.id,
@@ -90,8 +97,8 @@ export default function PastEntriesScreen() {
             hoursInSchool: entry.num_hours_children,
             teachersAbsent: parseInt(entry.num_teachers_absent),
             cleanlinessScore: parseInt(entry.cleanliness),
-            playgroundUsed: entry.playground_used,
-            wereToysUsed: entry.sinks_used,
+            playgroundUsed: convertToDisplayValue(entry.playground_used),
+            wereToysUsed: convertToDisplayValue(entry.sinks_used),
             roomDecorations: entry.classroom_decor,
             otherObservations: entry.observations,
             lastUpdated: new Date(entry.last_updated).toLocaleDateString(),
@@ -139,18 +146,21 @@ export default function PastEntriesScreen() {
   };
 
   const handleEditEntry = (id: string) => {
-    console.log("Edit entry:", id);
+    router.push({
+      pathname: "/edit_entry",
+      params: { entryId: id },
+    });
   };
 
   const goBack = () => {
-    router.push({pathname: './entry_form'})
+    router.back();
   };
 
   const goHome = () => {
     router.navigate("/");
   };
 
-  const renderEntryDetails = (details: EntryData["details"]) => (
+  const renderEntryDetails = (entryId: string, details: EntryData["details"]) => (
     <View style={styles.entryDetails}>
       <DataRow
         label="Time teachers arrive:"
@@ -182,19 +192,19 @@ export default function PastEntriesScreen() {
       />
       <DataRow
         label="Playground being used:"
-        value={details.playgroundUsed ? "Yes" : "No"}
+        value={details.playgroundUsed}
       />
       <DataRow
         label="Were the toys used:"
-        value={details.wereToysUsed ? "Yes" : "No"}
+        value={details.wereToysUsed}
       />
       <DataRow
         label="Room decorations:"
-        value={details.roomDecorations ? "Yes" : "No"}
+        value={details.roomDecorations}
       />
       <DataRow label="Other observations:" value={details.otherObservations} />
 
-      <Pressable style={styles.editButton} onPress={() => handleEditEntry("1")}>
+      <Pressable style={styles.editButton} onPress={() => handleEditEntry(entryId)}>
         <Text style={styles.editButtonText}>Edit Entry</Text>
       </Pressable>
 
@@ -263,18 +273,13 @@ export default function PastEntriesScreen() {
                   color="#fff"
                 />
               </Pressable>
-              {entry.isExpanded && renderEntryDetails(entry.details)}
+              {entry.isExpanded && renderEntryDetails(entry.id, entry.details)}
             </View>
           ))}
         </View>
       </ScrollView>
 
-      {/* dots at the bottom */}
-      <View style={styles.paginationContainer}>
-        {[1, 2, 3, 4, 5].map((dot) => (
-          <View key={dot} style={styles.paginationDot} />
-        ))}
-      </View>
+      <ProgressBar currentStep={5} />
     </View>
   );
 }
@@ -381,18 +386,6 @@ const styles = StyleSheet.create({
   entryButtonText: {
     color: "#fff",
     fontSize: 14,
-  },
-  paginationContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    paddingVertical: 16,
-  },
-  paginationDot: {
-    width: 30,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#FF9966",
-    marginHorizontal: 4,
   },
   entryDetails: {
     backgroundColor: "white",
