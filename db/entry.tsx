@@ -217,3 +217,20 @@ export async function editEntry(
     return null;
   }
 }
+
+export async function getEntrybyArrivalDate(
+  db: SQLite.SQLiteDatabase,
+  arrivalDate: string,
+): Promise<Entry[] | null> {
+  try {
+    const result = await db.getAllAsync<Entry>(`SELECT * FROM entries WHERE arrival_date = ?`, [arrivalDate]);
+    
+    if (result.length > 0) {
+      return result;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error finding entries by arrival date:", error);
+    return null;
+  }
+}

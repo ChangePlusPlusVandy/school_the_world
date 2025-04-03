@@ -13,7 +13,7 @@ import {
   getCommunityById,
   getAllCommunitiesByCountry,
 } from "./community";
-import { insertEntry, editEntry, deleteEntryById, getEntryById, getEntries} from "./entry";
+import { insertEntry, editEntry, deleteEntryById, getEntryById, getEntries, getEntrybyArrivalDate} from "./entry";
 
 import { Country } from "./country";
 import { Community } from "./community";
@@ -283,6 +283,16 @@ export class DatabaseService {
       return await deleteEntryById(this.db, id);
     } catch (err) {
       console.error("error getting entry by id", err);
+      return null;
+    }
+  }
+
+  async getEntrybyArrivalDate(arrivalDate: string): Promise<Entry[] | null> {
+    try {
+      if (!this.db) throw new Error("db not initialized");
+      return await getEntrybyArrivalDate(this.db, arrivalDate);
+    } catch (err) {
+      console.error("error getting entries by arrival date", err);
       return null;
     }
   }
