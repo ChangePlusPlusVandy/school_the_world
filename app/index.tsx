@@ -1,8 +1,9 @@
-import { StyleSheet, View, Text, Pressable } from "react-native"
+import { StyleSheet, View, Text, Pressable, TouchableOpacity } from "react-native"
 import { Link } from "expo-router"
 import { Feather, MaterialIcons } from "@expo/vector-icons"
 import { useEffect } from "react"
 import { firebaseSync } from "@/db/sync"
+import ProgressBar from './components/ProgressBar'
 
 export default function Homepage() {
   useEffect(() => {
@@ -16,7 +17,7 @@ export default function Homepage() {
       <Text style={styles.title}>Choose Page</Text>
 
       <Link href="/country_list" asChild>
-        <Pressable style={styles.card}>
+        <TouchableOpacity style={styles.card}>
           <View>
             <View style={styles.iconContainer}>
               <Feather name="clipboard" size={24} color="darkblue" />
@@ -26,11 +27,11 @@ export default function Homepage() {
               <Text style={styles.cardSubtitle}>Create new data entries</Text>
             </View>
           </View>
-        </Pressable>
+        </TouchableOpacity>
       </Link>
 
       <Link href="/data_visualizations" asChild>
-        <Pressable style={styles.card}>
+        <TouchableOpacity style={styles.card}>
           <View>
             <View style={styles.iconContainer}>
               <Feather name="bar-chart-2" size={24} color="darkblue" />
@@ -40,8 +41,10 @@ export default function Homepage() {
               <Text style={styles.cardSubtitle}>View and export graphs</Text>
             </View>
           </View>
-        </Pressable>
+        </TouchableOpacity>
       </Link>
+
+      <ProgressBar currentStep={0} />
 
       <Pressable 
         style={styles.syncButton} 

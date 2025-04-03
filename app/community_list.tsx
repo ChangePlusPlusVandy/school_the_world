@@ -13,6 +13,7 @@ import {
 import { Link, useLocalSearchParams } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
+import ProgressBar from './components/ProgressBar';
 
 type Community = {
   id: number;
@@ -417,6 +418,8 @@ export default function CommunityList() {
           </View>
         </View>
       </Modal>
+
+      <ProgressBar currentStep={2} />
     </View>
   );
 }
