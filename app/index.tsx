@@ -30,7 +30,7 @@ export default function Homepage() {
         </TouchableOpacity>
       </Link>
 
-      <Link href="/data_visualizations" asChild>
+      <Link href="/filtered" asChild>
         <TouchableOpacity style={styles.card}>
           <View>
             <View style={styles.iconContainer}>

@@ -118,7 +118,9 @@ export default function DataTrackingCountry() {
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={30} />
         </TouchableOpacity>
-        <MaterialIcons name="home-filled" size={50} />
+        <TouchableOpacity onPress={() => router.push("/")}>
+          <MaterialIcons name="home-filled" size={50} />
+        </TouchableOpacity>
         <MaterialIcons name="upload" size={40} />
       </View>
 

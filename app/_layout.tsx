@@ -1,15 +1,14 @@
-// app/layout.tsx
 import { Tabs } from 'expo-router';
 
 export default function Layout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true
-        // Add any global tab options here
+        headerShown: false, // Hides the header (filename at the top)
+        tabBarStyle: { display: 'none' }, // Hides the bottom tab bar
       }}
-    >
-      {/* Tab configurations will be auto-generated from your file structure */}
-    </Tabs>
+    />
   );
 }
+
+

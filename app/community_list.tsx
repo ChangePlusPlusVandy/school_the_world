@@ -13,6 +13,7 @@ import {
 import { Link, useLocalSearchParams } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
+import { useRouter } from "expo-router";
 import ProgressBar from './components/ProgressBar';
 
 type Community = {
@@ -22,6 +23,7 @@ type Community = {
 };
 
 export default function CommunityList() {
+  const router = useRouter();
   const [schools, setSchools] = useState<string[]>([]);
   const [filteredSchools, setFilteredSchools] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -234,6 +236,17 @@ export default function CommunityList() {
 
   return (
     <View style={styles.container}>
+
+      <View style={styles.topRow}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <MaterialIcons name="arrow-back" size={30} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/")}>
+          <MaterialIcons name="home-filled" size={50} />
+        </TouchableOpacity>
+        <MaterialIcons name="upload" size={40} />
+      </View>
+
       <Text style={styles.title}>Choose Community</Text>
       <TextInput
         style={styles.input}
@@ -428,6 +441,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  topRow: {
+    width: 300,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 24,
