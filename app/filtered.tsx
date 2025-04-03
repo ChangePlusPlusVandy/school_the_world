@@ -234,21 +234,15 @@ export default function FilterPage() {
 
           {expandAddFiltersMenu && (
             <View style={styles.addFiltersMainDropdown}>
-              <FlatList
-                data={Object.values(FilterType)}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.addFiltersMainDropdownItem}
-                    onPress={() => setCurrentFilterType(item)}
-                  >
-                    <Text style={styles.addFiltersMainDropdownItemText}>
-                      {item}
-                    </Text>
-                    <AntDesign name="right" size={12} color="black" />
-                  </TouchableOpacity>
-                )}
-              />
+              <TouchableOpacity 
+              style={styles.addFiltersMainDropdownItem}
+              onPress={()=> {setCurrentFilterType(FilterType.StartDate
+              )}}>
+                <Text style={styles.addFiltersMainDropdownItemText}>
+                  {FilterType.StartDate}
+                </Text>
+                <AntDesign name="right" size={12} color="black"/>
+              </TouchableOpacity>
             </View>
           )}
         </View>
