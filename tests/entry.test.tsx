@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { DatabaseService, createDatabase } from "@/db/base";
-import { Entry, getEntrybyArrivalDate, getEntryById } from "../db/entry";
+import { Entry, getEntrybyArrivalYear, getEntryById } from "../db/entry";
 
 // Mock expo-sqlite
 jest.mock("expo-sqlite", () => ({
@@ -28,7 +28,7 @@ describe("DatabaseService", () => {
     dbService = new DatabaseService();
   });
 
-  describe('getEntrybyArrivalDate', () => {
+  describe('getEntrybyArrivalYear', () => {
     let db: SQLite.SQLiteDatabase;
   
     beforeEach(() => {
@@ -37,32 +37,39 @@ describe("DatabaseService", () => {
       } as unknown as SQLite.SQLiteDatabase;
     });
   
-    it('should return entries if arrivalDate matches', async () => {
+    it('should return entries if arrivalYear matches', async () => {
       const mockEntries = [{ id: 1, arrival_date: '2023-10-01', name: 'Test Entry' }];
       (db.getAllAsync as jest.Mock).mockResolvedValue(mockEntries);
   
-      const result = await getEntrybyArrivalDate(db, '2023-10-01');
-      expect(db.getAllAsync).toHaveBeenCalledWith(`SELECT * FROM entries WHERE arrival_date = ?`, ['2023-10-01']);
+      const result = await getEntrybyArrivalYear(db, '2023');
+      // expect(db.getAllAsync).toHaveBeenCalledWith(`SELECT * FROM entries WHERE arrival_date BETWEEN ? AND ?`, ['2023-01-01', '2023-12-31']);
       expect(result).toEqual(mockEntries);
     });
+
   
-    it('should return multiple entries if arrivalDate matches', async () => {
+    it('should return multiple entries if arrivalYear matches', async () => {
       const mockEntries = [
-        { id: 1, arrival_date: '2023-10-01', name: 'Test Entry One' },
-        { id: 2, arrival_date: '2023-10-01', name: 'Test Entry Two' }
+        { id: 1, arrival_date: '2023-01-01', name: 'Test Entry One' },
+        { id: 2, arrival_date: '2023-10-01', name: 'Test Entry Two' },
+        { id: 3, arrival_date: '2023-12-31', name: 'Test Entry Three' },
+        { id: 4, arrival_date: '2024-12-31', name: 'Test Entry Four' }
+      ];
+      const expectedResult = [
+        { id: 1, arrival_date: '2023-01-01', name: 'Test Entry One' },
+        { id: 2, arrival_date: '2023-10-01', name: 'Test Entry Two' },
+        { id: 3, arrival_date: '2023-12-31', name: 'Test Entry Three' }
       ];
       (db.getAllAsync as jest.Mock).mockResolvedValue(mockEntries);
   
-      const result = await getEntrybyArrivalDate(db, '2023-10-01');
-      expect(db.getAllAsync).toHaveBeenCalledWith(`SELECT * FROM entries WHERE arrival_date = ?`, ['2023-10-01']);
-      expect(result).toEqual(mockEntries);
+      const result = await getEntrybyArrivalYear(db, '2023');
+      expect(result).toEqual(expectedResult);
     });
   
     it('should return null if no entries match', async () => {
-      (db.getAllAsync as jest.Mock).mockResolvedValue([]);
+      const mockEntries = [{ id: 1, arrival_date: '2020-10-01', name: 'Test Entry' }];
+      (db.getAllAsync as jest.Mock).mockResolvedValue(mockEntries);
   
-      const result = await getEntrybyArrivalDate(db, '2023-10-01');
-      expect(db.getAllAsync).toHaveBeenCalledWith(`SELECT * FROM entries WHERE arrival_date = ?`, ['2023-10-01']);
+      const result = await getEntrybyArrivalYear(db, '2025');
       expect(result).toBeNull();
     });
   
@@ -71,9 +78,8 @@ describe("DatabaseService", () => {
       const mockError = new Error('Database error');
       (db.getAllAsync as jest.Mock).mockRejectedValue(mockError);
   
-      const result = await getEntrybyArrivalDate(db, '2023-10-01');
-      expect(db.getAllAsync).toHaveBeenCalledWith(`SELECT * FROM entries WHERE arrival_date = ?`, ['2023-10-01']);
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Error finding entries by arrival date:", mockError);
+      const result = await getEntrybyArrivalYear(db, '2023');
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error finding entries by arrival year:", mockError);
       expect(result).toBeNull();
   
       consoleErrorSpy.mockRestore();

@@ -1,5 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import UUID from "react-native-uuid";
+import { endAsyncEvent } from "react-native/Libraries/Performance/Systrace";
 export interface Entry {
   id: string;
   arrival_date: string;
@@ -218,19 +219,22 @@ export async function editEntry(
   }
 }
 
-export async function getEntrybyArrivalDate(
+export async function getEntrybyArrivalYear(
   db: SQLite.SQLiteDatabase,
-  arrivalDate: string,
+  arrivalYear: string,
 ): Promise<Entry[] | null> {
   try {
-    const result = await db.getAllAsync<Entry>(`SELECT * FROM entries WHERE arrival_date = ?`, [arrivalDate]);
-    
+    const firstDate = arrivalYear+"-01-01";
+    const lastDate = arrivalYear+"-12-31";
+    const allEntries = await db.getAllAsync<Entry>(`SELECT * FROM entries`);
+    const result = allEntries.filter(entry => entry.arrival_date >= firstDate && entry.arrival_date <= lastDate);
+    console.log(result);
     if (result.length > 0) {
       return result;
     }
     return null;
   } catch (error) {
-    console.error("Error finding entries by arrival date:", error);
+    console.error("Error finding entries by arrival year:", error);
     return null;
   }
 }
