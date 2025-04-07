@@ -69,6 +69,22 @@ export async function getEntries(
   }
 };
 
+export async function getAllAvailableYears(
+  db: SQLite.SQLiteDatabase
+): Promise<string[]> {
+  try {
+    const result = await db.getAllAsync<{ year: string }>(
+      `SELECT DISTINCT SUBSTR(arrival_date, 1, 4) AS year FROM entries ORDER BY year DESC`
+    );
+
+    const years = result.map((row) => row.year);
+    return years;
+  } catch (error) {
+    console.error("Error getting all available years:", error);
+    return [];
+  }
+}
+
 export async function insertEntry(
   db: SQLite.SQLiteDatabase,
 
