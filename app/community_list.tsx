@@ -14,7 +14,7 @@ import { Link, useLocalSearchParams } from "expo-router";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { createDatabase, DatabaseService } from "../db/base";
 import { useRouter } from "expo-router";
-import ProgressBar from './components/ProgressBar';
+import ProgressBar from "./components/ProgressBar";
 
 type Community = {
   id: number;
@@ -84,29 +84,27 @@ export default function CommunityList() {
       fetchCommunities();
     }
   }, [db, country]);
-    // Fetch communities based on the selected country
-    useEffect(() => {
-      if (db && country) {
-        fetchCommunitiesFromDb();
-      }
-    }, [db, country]);
+  // Fetch communities based on the selected country
+  useEffect(() => {
+    if (db && country) {
+      fetchCommunitiesFromDb();
+    }
+  }, [db, country]);
 
-    // Fetch communities from the database
-    const fetchCommunitiesFromDb = async () => {
-      if (!db || !country) return;
-      
-      try {
-        const communities = await db.getCommunitiesByCountry(
-          country as string
-        );
-        if (communities) {
-          setSchools(communities.map((community) => community.name));
-          setFilteredSchools(communities.map((community) => community.name));
-        }
-      } catch (error) {
-        console.error("Error fetching communities:", error);
+  // Fetch communities from the database
+  const fetchCommunitiesFromDb = async () => {
+    if (!db || !country) return;
+
+    try {
+      const communities = await db.getCommunitiesByCountry(country as string);
+      if (communities) {
+        setSchools(communities.map((community) => community.name));
+        setFilteredSchools(communities.map((community) => community.name));
       }
-    };
+    } catch (error) {
+      console.error("Error fetching communities:", error);
+    }
+  };
 
   // Handle search functionality
   useEffect(() => {
@@ -140,12 +138,12 @@ export default function CommunityList() {
         if (newCommunity) {
           // Refresh the communities list from the database
           await fetchCommunitiesFromDb();
-          
+
           // Reset form
           setSchoolName("");
           setStatus("");
           setModalVisible(false);
-          
+
           // Show success message
           Alert.alert("Success", `${schoolName} added successfully!`);
         } else {
@@ -159,7 +157,6 @@ export default function CommunityList() {
       alert("Please fill out all fields.");
     }
   };
-
 
   const handleDelete = async (school: string) => {
     if (db) {
@@ -236,7 +233,6 @@ export default function CommunityList() {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.topRow}>
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={30} />
@@ -271,7 +267,10 @@ export default function CommunityList() {
         {schools.map((school, index) => (
           <View key={index} style={[styles.card, styles.schoolCard]}>
             <View style={styles.schoolRow}>
-              <Link href={`/choose_program?country=${country}&community=${school}`} asChild>
+              <Link
+                href={`/choose_program?country=${country}&community=${school}`}
+                asChild
+              >
                 <Pressable>
                   <Text style={styles.cardTitle}>{school}</Text>
                 </Pressable>
@@ -438,24 +437,32 @@ export default function CommunityList() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
   topRow: {
     width: 300,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
+
+  container: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: "#EFF2F7",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+  },
+
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginTop: 24,
+    marginBottom: 32,
+    paddingBottom: "3%",
   },
   input: {
+    fontSize: 16,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#d1d5db",
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 15,
