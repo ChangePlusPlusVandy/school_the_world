@@ -13,7 +13,7 @@ import {
   getCommunityById,
   getAllCommunitiesByCountry,
 } from "./community";
-import { insertEntry, editEntry, deleteEntryById, getEntryById, getEntries, getEntrybyArrivalYear} from "./entry";
+import { insertEntry, editEntry, deleteEntryById, getEntryById, getEntries, getEntrybyArrivalYear, getAllAvailableYears} from "./entry";
 
 import { Country } from "./country";
 import { Community } from "./community";
@@ -131,6 +131,16 @@ export class DatabaseService {
     } catch (err) {
       console.error("error getting entries:", err);
       return null;
+    }
+  } 
+
+  async getAllAvailableYears(): Promise<string[]> {
+    try {
+      if (!this.db) throw new Error("Database not initialized");
+      return await getAllAvailableYears(this.db);
+    } catch (err) {
+      console.error("Error fetching available years:", err);
+      return [];
     }
   }
 
