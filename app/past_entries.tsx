@@ -13,6 +13,7 @@ import { createDatabase, DatabaseService } from "../db/base";
 import { useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import ProgressBar from './components/ProgressBar';
+import { useRouter } from "expo-router";
 
 interface EntryData {
   id: string;
@@ -39,6 +40,7 @@ interface EntryData {
 
 export default function PastEntriesScreen() {
   const [db, setDb] = useState<DatabaseService | null>(null);
+  const router = useRouter();
   const [entries, setEntries] = useState<EntryData[]>([]);
   const [studentsAttended, setStudentsAttended] = useState<number>(0);
   const [parentsAttended, setParentsAttended] = useState<number>(0);
@@ -133,7 +135,9 @@ export default function PastEntriesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchEntries();
+      if (db){
+        fetchEntries();
+      }
     }, [db])
   );
 
@@ -215,10 +219,10 @@ export default function PastEntriesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={goBack} style={styles.backButton}>
+        <TouchableOpacity onPress={() => {router.back()}} style={styles.backButton}>
           <Feather name="chevron-left" size={24} color="darkblue" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={goHome} style={styles.homeButton}>
+        <TouchableOpacity onPress={() => {router.push("/")}} style={styles.homeButton}>
           <MaterialIcons name="home" size={24} color="darkblue" />
         </TouchableOpacity>
         <View style={styles.placeholderRight} />
